@@ -3,11 +3,13 @@ services:
     build: ./DatabaseServer
     ports:
       - "28080:8080"
+    restart: unless-stopped
 
   angular:
     build: ./Game
     ports:
       - "20080:80"
+    restart: unless-stopped
 
   node-server:
     build: ./node-server

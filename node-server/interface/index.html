@@ -98,14 +98,89 @@
 </div>
 
 <script>
-    const ws = new WebSocket('ws://192.168.0.6:3000');
+    const ws = new WebSocket('ws://192.168.0.6:23000');
 
     const mainButtons = document.getElementById('main-buttons');
     const toolbarContent = document.getElementById('toolbar-content');
 
-    ws.onopen = () => {
+    let gameId = prompt("Game ID:"); // Prompt user for game number
+
+    let currentState = [];
+
+    function update() {
+        ws.send(JSON.stringify({
+            event: 't_current-ui-state',
+            data: currentState
+        }));
+    }
+
+    ws.onopen = async () => {
         console.log('Connected to WebSocket');
-        update();
+
+        try {
+            // Step 1: Fetch initial touchComponents
+            const touchComponentsRes = await fetch(`http://192.168.0.6:28080/api/game/touchComponents/${gameId}`);
+            if (!touchComponentsRes.ok) throw new Error(`Failed to fetch touchComponents: ${touchComponentsRes.status}`);
+
+            const touchComponents = await touchComponentsRes.json();
+            if (!Array.isArray(touchComponents)) {
+                throw new Error("Invalid touchComponents format");
+            }
+
+            renderButtons(touchComponents);
+
+            // Step 2: Fetch game info
+            const gameRes = await fetch(`http://192.168.0.6:28080/api/game/${gameId}`);
+            if (!gameRes.ok) throw new Error(`Failed to fetch game: ${gameRes.status}`);
+
+            const game = await gameRes.json();
+
+            if (!game.hasStarted) {
+                // Step 3: Get player name and create reference
+                const name = prompt("Name");
+
+                function generateUUID() {
+                    // fallback UUID v4 generator
+                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                        const r = Math.random() * 16 | 0;
+                        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                        return v.toString(16);
+                    });
+                }
+
+                const reference = (crypto.randomUUID ? crypto.randomUUID() : generateUUID());
+
+                localStorage.setItem("playerReference", reference);
+
+                // Step 4: Create player
+                const playerRes = await fetch('http://192.168.0.6:28080/api/players', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: null,
+                        name: name,
+                        reference: reference,
+                        score: 0
+                    })
+                });
+
+                if (!playerRes.ok) throw new Error(`Failed to create player: ${playerRes.status}`);
+                const player = await playerRes.json();
+
+                if (!player?.id) throw new Error("Missing player ID in response");
+
+                // Step 5: Associate player with game
+                const addPlayerRes = await fetch(`http://192.168.0.6:28080/api/game/${gameId}/${player.id}`, {
+                    method: 'PUT'
+                });
+
+                if (!addPlayerRes.ok) throw new Error(`Failed to add player to game: ${addPlayerRes.status}`);
+                console.log("Player added to game successfully.");
+            }
+
+        } catch (error) {
+            console.error("Error during initialization:", error);
+        }
     };
 
     ws.onmessage = (event) => {
@@ -119,23 +194,12 @@
         }
     };
 
-    let currentState = [];
-
-    function update() {
-        ws.send(JSON.stringify({
-            event: 't_current-ui-state',
-            data: currentState
-        }));
-    }
-
     function renderButtons(components) {
-        document.documentElement.requestFullscreen();
-
         mainButtons.innerHTML = '';
         toolbarContent.innerHTML = '';
         currentState = JSON.parse(JSON.stringify(components)); // clone
 
-        components.forEach((comp, index) => {
+        components.filter(comps => comps.reference === localStorage.getItem("playerReference")).forEach((comp, index) => {
             let el;
 
             switch (comp.type) {
@@ -190,6 +254,3 @@
         return luminance > 0.5 ? '#000000' : '#FFFFFF';
     }
 </script>
-
-</body>
-</html>
