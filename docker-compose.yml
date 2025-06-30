@@ -1,0 +1,31 @@
+services:
+  springboot:
+    build: ./DatabaseServer
+    ports:
+      - "28080:8080"
+
+  angular:
+    build: ./Game
+    ports:
+      - "20080:80"
+
+  node-server:
+    build: ./node-server
+    ports:
+      - "23000:23000"
+      - "21100:21100"
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bqt
+    ports:
+      - "25432:5432"
+    volumes:
+      - bqtData:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  bqtData:

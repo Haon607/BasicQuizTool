@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Touch Button UI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: black;
+            width: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #main-buttons {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            align-content: flex-start;
+            padding: 20px;
+            box-sizing: border-box;
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        #toolbar {
+            flex: 0 0 auto;
+            overflow-x: auto;
+            overflow-y: hidden;
+            background: #111;
+            border-top: 2px solid #333;
+            padding: 10px;
+        }
+
+        #toolbar-content {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            min-width: max-content;
+            width: 100%;
+        }
+
+        button {
+            flex: 1 1 calc(25% - 40px);
+            min-width: 120px;
+            max-width: 300px;
+            padding: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            background-color: #2CADFA;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            filter: brightness(1.2);
+        }
+
+        button:disabled {
+            background: gray !important;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .styled-element {
+            padding: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 10px;
+            background-color: #2CADFA;
+            color: white;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+            border: none;
+            text-align: center;
+        }
+
+        input.styled-element {
+            width: calc(100% - 40px);
+        }
+    </style>
+</head>
+<body>
+
+<div id="main-buttons"></div>
+<div id="toolbar">
+    <div id="toolbar-content"></div>
+</div>
+
+<script>
+    const ws = new WebSocket('ws://192.168.0.6:3000');
+
+    const mainButtons = document.getElementById('main-buttons');
+    const toolbarContent = document.getElementById('toolbar-content');
+
+    ws.onopen = () => {
+        console.log('Connected to WebSocket');
+        update();
+    };
+
+    ws.onmessage = (event) => {
+        try {
+            const msg = JSON.parse(event.data);
+            if (msg.event === 't_update-ui-state' && Array.isArray(msg.data)) {
+                renderButtons(msg.data);
+            }
+        } catch (e) {
+            console.error('Invalid message:', e);
+        }
+    };
+
+    let currentState = [];
+
+    function update() {
+        ws.send(JSON.stringify({
+            event: 't_current-ui-state',
+            data: currentState
+        }));
+    }
+
+    function renderButtons(components) {
+        document.documentElement.requestFullscreen();
+
+        mainButtons.innerHTML = '';
+        toolbarContent.innerHTML = '';
+        currentState = JSON.parse(JSON.stringify(components)); // clone
+
+        components.forEach((comp, index) => {
+            let el;
+
+            switch (comp.type) {
+                case 'button':
+                    el = document.createElement('button');
+                    el.textContent = comp.displayName;
+                    el.disabled = comp.disabled;
+
+                    el.onclick = () => {
+                        currentState[index].pressed = true;
+                        if (comp.sendUpdate) {
+                            update();
+                        }
+                        currentState[index].pressed = false;
+                    };
+                    break;
+
+                case 'label':
+                    el = document.createElement('div');
+                    el.textContent = comp.displayName;
+                    el.classList.add('styled-element');
+                    break;
+
+                case 'input':
+                    el = document.createElement('input');
+                    el.type = 'text';
+                    el.value = comp.value || '';
+                    el.placeholder = comp.displayName || '';
+                    el.classList.add('styled-element');
+
+                    el.addEventListener('input', () => currentState[index].value = el.value);
+                    break;
+            }
+
+            if (comp.color) {
+                el.style.backgroundColor = comp.color;
+                el.style.color = getContrastColor(comp.color);
+            }
+
+            if (el) {
+                (comp.toolbarButton ? toolbarContent : mainButtons).appendChild(el);
+            }
+        });
+    }
+
+    function getContrastColor(hexColor) {
+        const color = hexColor.replace(/^#/, '');
+        const r = parseInt(color.slice(0, 2), 16) / 255;
+        const g = parseInt(color.slice(2, 4), 16) / 255;
+        const b = parseInt(color.slice(4, 6), 16) / 255;
+        const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        return luminance > 0.5 ? '#000000' : '#FFFFFF';
+    }
+</script>
+
+</body>
+</html>
