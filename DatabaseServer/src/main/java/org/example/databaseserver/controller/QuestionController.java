@@ -1,7 +1,9 @@
 package org.example.databaseserver.controller;
 
 import org.example.databaseserver.objects.entities.Question;
+import org.example.databaseserver.objects.entities.QuestionSet;
 import org.example.databaseserver.repos.QuestionRepository;
+import org.example.databaseserver.repos.QuestionSetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,16 +19,24 @@ import java.util.Optional;
 public class QuestionController {
     @Autowired
     private QuestionRepository questionRepository;
+    @Autowired
+    private QuestionSetRepository questionSetRepository;
 
     @GetMapping
     public ResponseEntity<List<Question>> getQuestions() {
         return ResponseEntity.ok().body(questionRepository.findAll());
     }
 
-    @GetMapping("/{order}")
-    public ResponseEntity<Question> getQuestion(@PathVariable Long order) {
-        Optional<Question> question = questionRepository.findByQuestionOrder(order);
+    @GetMapping("/{id}")
+    public ResponseEntity<Question> getQuestion(@PathVariable Long id) {
+        Optional<Question> question = questionRepository.findById(id);
         return question.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/set/{id}")
+    public ResponseEntity<QuestionSet> getQuestionSet(@PathVariable Long id) {
+        Optional<QuestionSet> questionSet = questionSetRepository.findById(id);
+        return questionSet.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
 //    @PostMapping

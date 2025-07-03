@@ -11,9 +11,13 @@ import java.util.Set;
 @NoArgsConstructor
 public class Question {
     @Id
-    public Long questionOrder;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "questionIdSequence")
+    public Long id;
     public String questionText;
     public String picturePath;
     @OneToMany
     public Set<Answer> answers;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "set_id")
+    public QuestionSet set;
 }
