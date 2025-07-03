@@ -1,6 +1,8 @@
 package org.example.databaseserver.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.databaseserver.objects.entities.Game;
 import org.example.databaseserver.objects.entities.Player;
 import org.example.databaseserver.repos.GameRepository;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Controller
@@ -49,6 +52,34 @@ public class GameController {
     public ResponseEntity<Game> setTouchComponents(@PathVariable Long id, @RequestBody String touchComponents) {
         Game game = gameRepository.findById(id).orElseThrow();
         game.touchComponents = touchComponents;
+        gameRepository.save(game);
+        return ResponseEntity.ok(game);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Game> patchGame(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> updates) throws JsonProcessingException {
+
+        Game game = gameRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Game not found"));
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        for (Map.Entry<String, Object> entry : updates.entrySet()) {
+            switch (entry.getKey()) {
+                case "hasStarted" -> game.hasStarted = (Boolean) entry.getValue();
+
+                case "touchComponents" -> {
+                    List<Map<String, Object>> components =
+                            mapper.convertValue(entry.getValue(), new TypeReference<>() {});
+                    game.setTouchComponentsJson(components);
+                }
+
+                default -> throw new IllegalArgumentException("Unknown field: " + entry.getKey());
+            }
+        }
+
         gameRepository.save(game);
         return ResponseEntity.ok(game);
     }

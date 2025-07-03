@@ -39,6 +39,11 @@ public class QuestionController {
         return questionSet.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/set")
+    public ResponseEntity<List<QuestionSet>> getQuestionSets() {
+        return ResponseEntity.ok().body(questionSetRepository.findAll());
+    }
+
 //    @PostMapping
 //    public ResponseEntity<Question> createQuestion(@RequestBody Question player) {
 //        return ResponseEntity.ok().body(questionRepository.save(player));

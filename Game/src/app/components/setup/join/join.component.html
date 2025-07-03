@@ -1,0 +1,11 @@
+<div class="background">
+  @if (game) {
+    <div class="content content-highlight">
+      <h1>Jetzt einsteigen!</h1>
+      <p>Spielnummer: {{ game?.id }}</p>
+    </div>
+<!--    <app-scoreboard class="scoreboard"></app-scoreboard>-->
+  } @else {
+    <span id="title">Warte auf Server...</span>
+  }
+</div>
