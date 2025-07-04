@@ -118,6 +118,10 @@
         console.log('Connected to WebSocket');
 
         try {
+            if (gameId.startsWith('HOST')) {
+                localStorage.setItem("playerReference", 'host');
+                gameId = prompt("HOST-GameId");
+            }
             // Step 1: Fetch initial touchComponents
             const touchComponentsRes = await fetch(`http://192.168.0.6:28080/api/game/touchComponents/${gameId}`);
             if (!touchComponentsRes.ok) throw new Error(`Failed to fetch touchComponents: ${touchComponentsRes.status}`);
@@ -128,6 +132,8 @@
             }
 
             renderButtons(touchComponents);
+
+            if (localStorage.getItem("playerReference") === 'host') return;
 
             // Step 2: Fetch game info
             const gameRes = await fetch(`http://192.168.0.6:28080/api/game/${gameId}`);
@@ -143,7 +149,8 @@
                     // Step 4: Check if player with this reference is already in the game
                     const gamePlayerRes = await fetch(`http://192.168.0.6:28080/api/game/${gameId}`);
                     if (!gamePlayerRes.ok) throw new Error(`Failed to fetch players: ${gamePlayerRes.status}`);
-                    const players = await gamePlayerRes.json().players;
+                    const playersPromise = await gamePlayerRes.json();
+                    const players = playersPromise.players;
 
                     const existingPlayer = players.find(p => p.reference === reference);
                     if (existingPlayer) {
