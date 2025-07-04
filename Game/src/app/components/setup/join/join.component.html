@@ -1,11 +1,24 @@
-<div class="background">
-  @if (game) {
-    <div class="content content-highlight">
-      <h1>Jetzt einsteigen!</h1>
-      <p>Spielnummer: {{ game?.id }}</p>
-    </div>
-<!--    <app-scoreboard class="scoreboard"></app-scoreboard>-->
-  } @else {
-    <span id="title">Warte auf Server...</span>
-  }
+<div class="base">
+    @if (game) {
+        <div class="content">
+            <p>Spielnummer:</p>
+            <h1>{{ game.id }}</h1>
+            <h3>192.168.0.6:21100</h3>
+            @if (game.players) {
+                <p>{{ game.players.length }} Spieler beigetreten</p>
+            } @else {
+                <p>Warte auf Spieler</p>
+            }
+        </div>
+        <!--    <app-scoreboard class="scoreboard"></app-scoreboard>-->
+        <div id="player-card-container">
+            @for (player of game.players; track player.id) {
+                <div class="player-card" id="player-card-{{player.id}}">
+                    <p>{{ player.name }}</p>
+                </div>
+            }
+        </div>
+    } @else {
+        <span id="title">Warte auf Server...</span>
+    }
 </div>

@@ -1,3 +1,7 @@
-@for (set of sets; track set.id) {
-    <button (click)="launch(set)">Starte {{set.name}}</button>
-}
+<div class="base">
+    <div class="content">
+        @for (set of sets; track set.id) {
+            <button (click)="launch(set)">{{ set.name }}</button>
+        }
+    </div>
+</div>

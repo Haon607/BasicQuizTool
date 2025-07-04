@@ -136,23 +136,37 @@
             const game = await gameRes.json();
 
             if (!game.hasStarted) {
-                // Step 3: Get player name and create reference
+                // Step 3: Get or check existing reference
+                let reference = localStorage.getItem("playerReference");
+
+                if (reference) {
+                    // Step 4: Check if player with this reference is already in the game
+                    const gamePlayerRes = await fetch(`http://192.168.0.6:28080/api/game/${gameId}`);
+                    if (!gamePlayerRes.ok) throw new Error(`Failed to fetch players: ${gamePlayerRes.status}`);
+                    const players = await gamePlayerRes.json().players;
+
+                    const existingPlayer = players.find(p => p.reference === reference);
+                    if (existingPlayer) {
+                        console.log("Player already in game. Skipping registration.");
+                        return;
+                    }
+                }
+
+                // Step 5: Ask for name if not already in game
                 const name = prompt("Name");
 
                 function generateUUID() {
-                    // fallback UUID v4 generator
-                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
                         const r = Math.random() * 16 | 0;
                         const v = c === 'x' ? r : (r & 0x3 | 0x8);
                         return v.toString(16);
                     });
                 }
 
-                const reference = (crypto.randomUUID ? crypto.randomUUID() : generateUUID());
-
+                reference = reference || (crypto.randomUUID ? crypto.randomUUID() : generateUUID());
                 localStorage.setItem("playerReference", reference);
 
-                // Step 4: Create player
+                // Step 6: Create player
                 const playerRes = await fetch('http://192.168.0.6:28080/api/players', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -166,16 +180,20 @@
 
                 if (!playerRes.ok) throw new Error(`Failed to create player: ${playerRes.status}`);
                 const player = await playerRes.json();
-
                 if (!player?.id) throw new Error("Missing player ID in response");
 
-                // Step 5: Associate player with game
+                // Step 7: Associate player with game
                 const addPlayerRes = await fetch(`http://192.168.0.6:28080/api/game/${gameId}/${player.id}`, {
                     method: 'PUT'
                 });
 
                 if (!addPlayerRes.ok) throw new Error(`Failed to add player to game: ${addPlayerRes.status}`);
                 console.log("Player added to game successfully.");
+
+                // Step 8: Tell Game to re-fetch that game
+                ws.send(JSON.stringify({
+                    event: 'player-joined'
+                }));
             }
 
         } catch (error) {

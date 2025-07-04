@@ -8,7 +8,7 @@ import { Question, QuestionSet } from "../models/DTOs";
 @Injectable({
   providedIn: 'root'
 })
-export class DatabaseHttpLink {
+export class DatabaseHttpLinkService {
 
   constructor(private http: HttpClient) { }
 

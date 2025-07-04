@@ -4,7 +4,7 @@ import { Game, QuestionSet } from "../models/DTOs";
 @Injectable({
   providedIn: 'root'
 })
-export class Memory {
+export class MemoryService {
   questionSet?: QuestionSet;
   game?: Game;
 

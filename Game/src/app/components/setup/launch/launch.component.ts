@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { Router } from "@angular/router";
 import { QuestionSet } from "../../../models/DTOs";
-import { DatabaseHttpLink } from "../../../services/database-http-link";
-import { Memory } from "../../../services/memory";
+import { DatabaseHttpLinkService } from "../../../services/database-http-link.service";
+import { MemoryService } from "../../../services/memory.service";
 
 @Component({
   selector: 'app-launch.game',
@@ -13,7 +13,7 @@ import { Memory } from "../../../services/memory";
 })
 export class LaunchComponent {
   sets: QuestionSet[] = [];
-  constructor(private router: Router, private db: DatabaseHttpLink, private memory: Memory) {
+  constructor(private router: Router, private db: DatabaseHttpLinkService, private memory: MemoryService) {
     this.db.getAllQuestionSet().subscribe(sets => this.sets = sets);
   }
 

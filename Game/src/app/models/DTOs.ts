@@ -10,6 +10,7 @@ export interface TouchComponent {
     sendUpdate?: boolean;
     toolbarButton?: boolean;
     value?: string;
+    reference: string,
 }
 
 export interface Player {
