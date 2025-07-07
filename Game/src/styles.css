@@ -90,3 +90,11 @@ app-info-card {
     left: 20px;
     transform: rotate(-5deg);
 }
+
+app-timer {
+    position: absolute;
+    bottom: 50px;
+    width: 95%;
+    height: 5%;
+    transform: rotate(1deg);
+}

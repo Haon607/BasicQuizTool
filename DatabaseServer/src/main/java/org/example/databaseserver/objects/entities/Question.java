@@ -20,4 +20,5 @@ public class Question {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "set_id")
     public QuestionSet set;
+    public Byte time;
 }

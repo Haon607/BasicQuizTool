@@ -199,10 +199,18 @@ export function getRandomWeightedItem<T>(items: WeightedItem<T>[]): T {
     return validItems[validItems.length - 1].item;
 }
 
-export function countWithDelay(start: number, end: number, delay: number, emit: (value: number) => void): Promise<void> {
+export function countWithDelay(
+    start: number,
+    end: number,
+    totalTime: number,
+    emit: (value: number) => void
+): Promise<void> {
     return new Promise((resolve) => {
-        let current = start;
         const step = start < end ? 1 : -1;
+        const steps = Math.abs(end - start);
+        const delay = steps === 0 ? totalTime : totalTime / steps;
+
+        let current = start;
 
         const interval = setInterval(() => {
             emit(current);

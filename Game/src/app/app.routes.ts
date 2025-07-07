@@ -8,5 +8,5 @@ export const routes: Routes = [
     {path: '', component: LaunchComponent},
     {path: 'join/:setId', component: JoinComponent},
     {path: 'intro', component: IntroComponent},
-    {path: 'question', component: QuestionComponent}
+    {path: 'question/:questionNumber', component: QuestionComponent}
 ];
