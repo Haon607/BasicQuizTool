@@ -15,10 +15,8 @@ public class Question {
     public Long id;
     public String questionText;
     public String picturePath;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.PERSIST)
     public Set<Answer> answers;
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "set_id")
-    public QuestionSet set;
-    public Byte time;
+    public int time;
+    public Boolean shuffleAnswers;
 }

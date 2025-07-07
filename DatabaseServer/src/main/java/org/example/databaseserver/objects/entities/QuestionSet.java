@@ -11,7 +11,7 @@ public class QuestionSet {
     public Long id;
     public String name;
     public Boolean sound;
-    @OneToMany(mappedBy = "set", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderColumn(name = "question_order")
     public List<Question> questions;
 }
