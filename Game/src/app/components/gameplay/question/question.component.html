@@ -1,4 +1,13 @@
 <div class="base">
     <app-info-card [game]="game"></app-info-card>
-    <app-timer [maxTime]="10"></app-timer>
+    <app-timer id="timer" [maxTime]="game.questionSet.questions[game.questionNumber].time"></app-timer>
+    <div class="content" id="question-card">
+        <h4 id="question">{{ game.questionSet.questions[game.questionNumber].questionText }}</h4>
+    </div>
+
+    <div class="content" id="answers-card">
+        @for (answer of game.questionSet.questions[game.questionNumber].answers; track answer.id) {
+            <p class="answers">{{ answer.answerText }}</p>
+        }
+    </div>
 </div>

@@ -10,8 +10,5 @@
         <module name="DatabaseServer.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="DatabaseServer.test" target="24" />
-    </bytecodeTargetLevel>
   </component>
 </project>

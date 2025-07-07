@@ -104,6 +104,6 @@ export class IntroComponent implements OnDestroy{
         gsap.to("#set-container-container", {scale: 0.1, autoAlpha: 0, ease: "back.in"});
         gsap.to(".player-card", {x: -250, duration: 1, ease: "power3.in"});
         await wait(1000);
-        this.router.navigateByUrl("question/" + this.game.questionNumber+1)
+        this.router.navigateByUrl("question/" + this.game.questionNumber);
     }
 }

@@ -11,6 +11,6 @@ button {
     border-radius: 10px;
 }
 
-button:nth-child(2) {
+button:nth-child(even) {
     background-color: var(--accent);
 }

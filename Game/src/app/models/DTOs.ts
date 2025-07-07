@@ -36,9 +36,10 @@ export interface QuestionSet {
 export interface Question {
     id: number;
     questionText: string;
-    picturePath: string;
+    picturePath?: string;
     answers: Answer[];
-    set: QuestionSet;
+    time: number;
+    shuffleAnswer: boolean;
 }
 
 export interface Game {

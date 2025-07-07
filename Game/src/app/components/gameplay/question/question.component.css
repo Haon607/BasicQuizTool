@@ -1,0 +1,30 @@
+#question-card {
+    transform: rotate(2deg);
+    padding: 15px;
+    gap: 10px;
+    width: 80%;
+    top: 50px;
+    right: 20px;
+    position: absolute;
+    z-index: 1;
+    /*visibility: hidden;*/
+}
+
+#question {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+#answers-card {
+
+}
+
+.answers {
+    background-color: var(--secondary);
+}
+
+.answers:nth-child(even) {
+    background-color: var(--accent);
+}

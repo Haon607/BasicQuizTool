@@ -1,13 +1,10 @@
 import { Component, Input } from '@angular/core';
 import { countWithDelay, wait } from "../../../utils";
 import { gsap } from "gsap";
-import { NgStyle } from "@angular/common";
 
 @Component({
     selector: 'app-timer',
-    imports: [
-        NgStyle
-    ],
+    imports: [],
     templateUrl: './timer.component.html',
     standalone: true,
     styleUrl: './timer.component.css'

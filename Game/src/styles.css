@@ -51,6 +51,10 @@ h3 {
     font-size: 80px;
 }
 
+h4 {
+    font-size: 65px;
+}
+
 .base {
     display: flex;
     flex-direction: column;
