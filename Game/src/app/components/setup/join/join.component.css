@@ -2,6 +2,7 @@
     width: 40%;
     z-index: 1;
 }
+
 #player-card-container {
     z-index: 0;
     position: absolute;
@@ -11,6 +12,14 @@
     justify-content: center;
     align-items: center;
 }
+
 .player-card {
     position: absolute;
+}
+
+h1 {
+    background-color: var(--primary);
+    color: var(--primary-text);
+    padding: 0 80px;
+    border-radius: 20px;
 }

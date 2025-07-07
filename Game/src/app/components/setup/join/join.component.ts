@@ -52,7 +52,7 @@ export class JoinComponent implements AfterViewChecked, OnDestroy {
         device.incomingEvents.subscribe(incomingEvent => {
             if (incomingEvent.event === 'player-joined') {
                 this.db.getGame(this.game!.id).subscribe(game => {
-                    this.game = game;
+                    this.game!.players.push(game.players.filter(player => !this.game!.players.includes(player))[0]);
                     this.rendered = false; // trigger re-animation
                     this.deviceHandler.sendUiState(game.players);
                 });
@@ -91,22 +91,30 @@ export class JoinComponent implements AfterViewChecked, OnDestroy {
                     x: `${x}px`,
                     y: `${y}px`,
                     duration: duration,
-                    autoAlpha: 0.2 * index - 0.4,
+                    autoAlpha: players.length <= 5 ? 1 : 0.2 * index - 0.4,
                     ease: "none"
                 });
             }
         });
     }
 
-    startGame() {
+    async startGame() {
         this.db.modifyGame(this.game!.id, {hasStarted: true}).subscribe(() => {
         });
+        this.device.sendEmptyUi();
+        gsap.to('#player-card-container', {scale: 0.1, autoAlpha: 0, ease: "back.in", duration: 1});
+        await wait(1000);
+        this.stopSpinning = true;
+        gsap.to('#info-card', {scale: 0.1, autoAlpha: 0, ease: "back.in", duration: 1});
+        await wait(1000);
+        this.router.navigateByUrl("");
     }
+
 
     private async startCircle() {
         while (!this.stopSpinning) {
             let duration: number = 1000;
-            if (this.game!.players.length > 2) {
+            if (this.game!.players.length > 5) {
                 duration = 60000 / this.game!.players.length;
                 this.game!.players.push(this.game!.players.shift()!);
                 this.positionPlayerCardsInCircle(duration / 1000);
@@ -117,5 +125,6 @@ export class JoinComponent implements AfterViewChecked, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        this.destroy$.next();
     }
 }

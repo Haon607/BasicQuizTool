@@ -1,6 +1,6 @@
 <div class="base">
     @if (game) {
-        <div class="content">
+        <div class="content" id="info-card">
             <p>Spielnummer:</p>
             <h1>{{ game.id }}</h1>
             <h3>192.168.0.6:21100</h3>
@@ -19,6 +19,6 @@
             }
         </div>
     } @else {
-        <span id="title">Warte auf Server...</span>
+        <p>Warte auf Server...</p>
     }
 </div>
