@@ -53,10 +53,15 @@ export class JoinComponent implements AfterViewChecked, OnDestroy {
         device.incomingEvents.subscribe(incomingEvent => {
             if (incomingEvent.event === 'player-joined') {
                 this.db.getGame(this.game!.id).subscribe(game => {
-                    this.game!.players.push(game.players.filter(player => !this.game!.players.includes(player))[0]);
-                    this.rendered = false; // trigger re-animation
-                    this.deviceHandler.sendUiState(game.players);
+                    const newPlayers = game.players.filter(
+                        incoming => !this.game!.players.some(existing => existing.id === incoming.id)
+                    );
+
+                    this.game!.players = [...this.game!.players, ...newPlayers];
+                    this.rendered = false;
+                    this.deviceHandler.sendUiState(this.game!.players);
                 });
+
             }
         });
 

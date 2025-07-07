@@ -1,6 +1,6 @@
 import { DeviceService } from "../../../services/device.service";
-import { Player, TouchComponent } from "../../../models/DTOs";
-import { accent, primary } from "../../../../styles";
+import { Game, Player, TouchComponent } from "../../../models/DTOs";
+import { accent, primary, secondary } from "../../../../styles";
 
 export class IntroDevice {
     constructor(
@@ -11,41 +11,65 @@ export class IntroDevice {
     handleTabletInput(components: TouchComponent[], startGameCallback: () => void) {
         components.filter(component => component.pressed && component.reference === 'host').forEach(component => {
             switch (component.id) {
-                case "startgame":
+                case "continue":
                     startGameCallback();
-                    this.device.sendEmptyUi();
                     break;
             }
         });
     }
 
-    sendUiState(players: Player[]): void {
+    sendUiState(players: Player[], game: Game): void {
         let elements: TouchComponent[] = [
             {
-                id: "startgame",
-                displayName: "Spiel starten",
+                id: "continue",
+                displayName: "Weiter",
                 disabled: players.length <= 1,
                 type: "button",
                 sendUpdate: true,
                 toolbarButton: true,
-                color: accent,
+                color: primary,
                 reference: 'host'
-            }
+            },{
+                id: "headline-gameinfo",
+                displayName: "Spielinfo",
+                type: "label",
+                color: primary,
+                reference: 'host'
+            },{
+                id: "setname",
+                displayName: game.questionSet.name,
+                type: "label",
+                color: secondary,
+                reference: 'host'
+            },{
+                id: "setquestionsnumber",
+                displayName: game.questionSet.questions.length + " Fragen",
+                type: "label",
+                color: secondary,
+                reference: 'host'
+            },{
+                id: "headline-players",
+                displayName: players.length + " Spieler",
+                type: "label",
+                color: primary,
+                reference: 'host'
+            },
         ];
 
         players.forEach(player => {
             elements.push({
-                id: "player-label-" + player.id,
-                displayName: "Du bist drinnen! " + player.name,
+                id: "player-name-" + player.id,
+                displayName: player.name + " - " + player.score,
                 type: "label",
                 color: primary,
+                toolbarButton: true,
                 reference: player.reference
             });
             elements.push({
                 id: "player-host-" + player.id,
                 displayName: player.name,
                 type: "label",
-                color: primary,
+                color: accent,
                 reference: 'host'
             });
         });

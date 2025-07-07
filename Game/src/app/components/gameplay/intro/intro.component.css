@@ -1,10 +1,11 @@
 .content {
     padding: 30px;
     gap: 10px;
-    width: 90%;
+    width: 80%;
     top: 250px;
     position: absolute;
     z-index: 1;
+    visibility: hidden;
 }
 
 #set-container {
@@ -31,10 +32,15 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    visibility: hidden;
 }
 
 .player-card {
     position: absolute;
     bottom: 130px;
     transform: rotate(-60deg);
+}
+
+#info-card {
+    visibility: hidden;
 }

@@ -15,6 +15,7 @@
 
 .player-card {
     position: absolute;
+    visibility: hidden;
 }
 
 h1 {
