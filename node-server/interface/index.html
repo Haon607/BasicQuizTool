@@ -88,6 +88,14 @@
         input.styled-element {
             width: calc(100% - 40px);
         }
+
+        #main-buttons > button,
+        #main-buttons > .styled-element,
+        #main-buttons > input.styled-element {
+            width: 90%;
+            max-width: 1000px;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
@@ -103,11 +111,11 @@
     const mainButtons = document.getElementById('main-buttons');
     const toolbarContent = document.getElementById('toolbar-content');
 
-    let gameId = prompt("Game ID:"); // Prompt user for game number
-
+    let gameId = prompt("Game ID:");
     let currentState = [];
 
     function update() {
+        console.log('[update] Sending current state to server:', currentState);
         ws.send(JSON.stringify({
             event: 't_current-ui-state',
             data: currentState
@@ -115,52 +123,68 @@
     }
 
     ws.onopen = async () => {
-        console.log('Connected to WebSocket');
+        console.log('[WebSocket] Connected to WebSocket');
 
         try {
             if (gameId.startsWith('HOST')) {
                 localStorage.setItem("playerReference", 'host');
                 gameId = prompt("HOST-GameId");
+                console.log('[HOST] Set as host. New Game ID:', gameId);
             }
-            // Step 1: Fetch initial touchComponents
+
+            if (gameId.startsWith('RESET')) {
+                localStorage.setItem("playerReference", '');
+                console.log('[RESET] Reset Local Storage:', localStorage.getItem("playerReference"));
+                window.location.reload();
+            }
+
+            console.log('[Fetch] Getting touchComponents for gameId:', gameId);
             const touchComponentsRes = await fetch(`http://192.168.0.6:28080/api/game/touchComponents/${gameId}`);
             if (!touchComponentsRes.ok) throw new Error(`Failed to fetch touchComponents: ${touchComponentsRes.status}`);
 
             const touchComponents = await touchComponentsRes.json();
+            console.log('[Fetch] Received touchComponents:', touchComponents);
+
             if (!Array.isArray(touchComponents)) {
                 throw new Error("Invalid touchComponents format");
             }
 
             renderButtons(touchComponents);
 
-            if (localStorage.getItem("playerReference") === 'host') return;
+            console.log('[LocalStorage] Current Value:', localStorage.getItem("playerReference"));
 
-            // Step 2: Fetch game info
+            if (localStorage.getItem("playerReference") === 'host') {
+                console.log('[Info] Host does not need to register player.');
+                return;
+            }
+
+            console.log('[Fetch] Getting game info...');
             const gameRes = await fetch(`http://192.168.0.6:28080/api/game/${gameId}`);
             if (!gameRes.ok) throw new Error(`Failed to fetch game: ${gameRes.status}`);
 
             const game = await gameRes.json();
+            console.log('[Fetch] Game info:', game);
 
             if (!game.hasStarted) {
-                // Step 3: Get or check existing reference
                 let reference = localStorage.getItem("playerReference");
+                console.log('[Player] Checking local player reference:', reference);
 
                 if (reference) {
-                    // Step 4: Check if player with this reference is already in the game
+                    console.log('[Player] Checking if player is already in the game...');
                     const gamePlayerRes = await fetch(`http://192.168.0.6:28080/api/game/${gameId}`);
-                    if (!gamePlayerRes.ok) throw new Error(`Failed to fetch players: ${gamePlayerRes.status}`);
                     const playersPromise = await gamePlayerRes.json();
                     const players = playersPromise.players;
+                    console.log('[Fetch] Existing players:', players);
 
                     const existingPlayer = players.find(p => p.reference === reference);
                     if (existingPlayer) {
-                        console.log("Player already in game. Skipping registration.");
+                        console.log('[Player] Player already exists in game. Skipping creation.');
                         return;
                     }
                 }
 
-                // Step 5: Ask for name if not already in game
                 const name = prompt("Name");
+                console.log('[Player] Name entered:', name);
 
                 function generateUUID() {
                     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -171,12 +195,13 @@
                 }
 
                 reference = reference || (crypto.randomUUID ? crypto.randomUUID() : generateUUID());
+                console.log('[Player] Final reference:', reference);
                 localStorage.setItem("playerReference", reference);
 
-                // Step 6: Create player
+                console.log('[Fetch] Creating player...');
                 const playerRes = await fetch('http://192.168.0.6:28080/api/players', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         id: null,
                         name: name,
@@ -185,89 +210,110 @@
                     })
                 });
 
-                if (!playerRes.ok) throw new Error(`Failed to create player: ${playerRes.status}`);
                 const player = await playerRes.json();
+                console.log('[Fetch] Created player:', player);
                 if (!player?.id) throw new Error("Missing player ID in response");
 
-                // Step 7: Associate player with game
+                console.log('[Fetch] Adding player to game...');
                 const addPlayerRes = await fetch(`http://192.168.0.6:28080/api/game/${gameId}/${player.id}`, {
                     method: 'PUT'
                 });
 
                 if (!addPlayerRes.ok) throw new Error(`Failed to add player to game: ${addPlayerRes.status}`);
-                console.log("Player added to game successfully.");
+                console.log('[Game] Player added successfully.');
 
-                // Step 8: Tell Game to re-fetch that game
                 ws.send(JSON.stringify({
                     event: 'player-joined'
                 }));
+                console.log('[WebSocket] Sent player-joined event.');
             }
 
         } catch (error) {
-            console.error("Error during initialization:", error);
+            console.error("[Error] Initialization failed:", error);
         }
     };
 
     ws.onmessage = (event) => {
+        // console.log('[WebSocket] Message received:', event.data);
         try {
             const msg = JSON.parse(event.data);
+            console.log('[WebSocket] Parsed message:', msg);
+
             if (msg.event === 't_update-ui-state' && Array.isArray(msg.data)) {
+                // console.log('[UI] Updating buttons with new state.');
                 renderButtons(msg.data);
             }
         } catch (e) {
-            console.error('Invalid message:', e);
+            console.error('[WebSocket] Failed to parse message:', e);
         }
     };
 
     function renderButtons(components) {
+        // console.log('[UI] Rendering buttons...');
         mainButtons.innerHTML = '';
         toolbarContent.innerHTML = '';
         currentState = JSON.parse(JSON.stringify(components)); // clone
+        // console.log('[UI] Cloned components into currentState:', currentState);
 
-        components.filter(comps => comps.reference === localStorage.getItem("playerReference")).forEach((comp, index) => {
-            let el;
+        components
+            .filter(comp => comp.reference === localStorage.getItem("playerReference"))
+            .forEach((comp, index) => {
+                // console.log(`[UI] Rendering component [${index}]:`, comp);
+                let el;
 
-            switch (comp.type) {
-                case 'button':
-                    el = document.createElement('button');
-                    el.textContent = comp.displayName;
-                    el.disabled = comp.disabled;
+                switch (comp.type) {
+                    case 'button':
+                        el = document.createElement('button');
+                        el.textContent = comp.displayName;
+                        el.disabled = comp.disabled;
+                        // console.log(`[UI] Created button "${comp.displayName}", disabled: ${comp.disabled}`);
 
-                    el.onclick = () => {
-                        currentState[index].pressed = true;
-                        if (comp.sendUpdate) {
-                            update();
-                        }
-                        currentState[index].pressed = false;
-                    };
-                    break;
+                        el.onclick = () => {
+                            console.log(`[Event] Button "${comp.displayName}" clicked.`);
+                            currentState[index].pressed = true;
+                            if (comp.sendUpdate) {
+                                console.log('[Event] sendUpdate is true. Calling update()...');
+                                update();
+                            }
+                            currentState[index].pressed = false;
+                        };
+                        break;
 
-                case 'label':
-                    el = document.createElement('div');
-                    el.textContent = comp.displayName;
-                    el.classList.add('styled-element');
-                    break;
+                    case 'label':
+                        el = document.createElement('div');
+                        el.textContent = comp.displayName;
+                        el.classList.add('styled-element');
+                        // console.log(`[UI] Created label "${comp.displayName}"`);
+                        break;
 
-                case 'input':
-                    el = document.createElement('input');
-                    el.type = 'text';
-                    el.value = comp.value || '';
-                    el.placeholder = comp.displayName || '';
-                    el.classList.add('styled-element');
+                    case 'input':
+                        el = document.createElement('input');
+                        el.type = 'text';
+                        el.value = comp.value || '';
+                        el.placeholder = comp.displayName || '';
+                        el.classList.add('styled-element');
+                        // console.log(`[UI] Created input with placeholder: "${comp.displayName}", initial value: "${comp.value}"`);
 
-                    el.addEventListener('input', () => currentState[index].value = el.value);
-                    break;
-            }
+                        el.addEventListener('input', () => {
+                            currentState[index].value = el.value;
+                            console.log(`[Event] Input changed. Updated value in currentState[${index}]:`, el.value);
+                        });
+                        break;
+                }
 
-            if (comp.color) {
-                el.style.backgroundColor = comp.color;
-                el.style.color = getContrastColor(comp.color);
-            }
+                if (comp.color) {
+                    el.style.backgroundColor = comp.color;
+                    el.style.color = getContrastColor(comp.color);
+                    // console.log(`[Style] Applied custom color: ${comp.color}, text color: ${getContrastColor(comp.color)}`);
+                }
 
-            if (el) {
-                (comp.toolbarButton ? toolbarContent : mainButtons).appendChild(el);
-            }
-        });
+                if (el) {
+                    (comp.toolbarButton ? toolbarContent : mainButtons).appendChild(el);
+                    // console.log(`[UI] Added element to ${comp.toolbarButton ? 'toolbar' : 'main'} section.`);
+                }
+            });
+
+        // console.log('[UI] Finished rendering components.');
     }
 
     function getContrastColor(hexColor) {
@@ -276,6 +322,8 @@
         const g = parseInt(color.slice(2, 4), 16) / 255;
         const b = parseInt(color.slice(4, 6), 16) / 255;
         const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-        return luminance > 0.5 ? '#000000' : '#FFFFFF';
+        const contrast = luminance > 0.5 ? '#000000' : '#FFFFFF';
+        // console.log(`[Color] getContrastColor(${hexColor}) = ${contrast}`);
+        return contrast;
     }
 </script>
