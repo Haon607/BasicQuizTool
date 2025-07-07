@@ -46,4 +46,7 @@ export interface Game {
     players: Player[];
     touchComponents: TouchComponent[];
     hasStarted: boolean;
+    questionSet: QuestionSet;
+    hasEnded: boolean;
+    questionNumber: number;
 }

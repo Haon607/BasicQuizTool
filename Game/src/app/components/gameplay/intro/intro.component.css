@@ -1,0 +1,40 @@
+.content {
+    padding: 30px;
+    gap: 10px;
+    width: 90%;
+    top: 250px;
+    position: absolute;
+    z-index: 1;
+}
+
+#set-container {
+    width: 100%;
+    height: 100%;
+}
+
+#set {
+    background-color: var(--primary);
+    border: none;
+    border-radius: 30px;
+    color: var(--primary-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+#player-card-container {
+    z-index: 0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.player-card {
+    position: absolute;
+    bottom: 130px;
+    transform: rotate(-60deg);
+}

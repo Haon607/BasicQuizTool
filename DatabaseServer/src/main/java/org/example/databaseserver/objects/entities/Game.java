@@ -28,6 +28,13 @@ public class Game {
 
     public Boolean hasStarted;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    public QuestionSet questionSet;
+
+    public Boolean hasEnded;
+
+    public Long questionNumber;
+
     // ObjectMapper can be static since it's thread-safe
     private static final ObjectMapper objectMapper = new ObjectMapper();
 

@@ -36,7 +36,7 @@ export class DatabaseHttpLinkService {
     });
   }
 
-  modifyGame(id: number, patchData: Partial<Game>): Observable<Game> {
+  modifyGame(id: number, patchData: any): Observable<Game> {
     return this.http.patch<Game>(`${this.gameUrl}/${id}`, patchData);
   }
 

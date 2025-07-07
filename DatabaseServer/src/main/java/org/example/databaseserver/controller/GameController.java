@@ -5,7 +5,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.databaseserver.objects.entities.Game;
 import org.example.databaseserver.objects.entities.Player;
+import org.example.databaseserver.objects.entities.QuestionSet;
 import org.example.databaseserver.repos.GameRepository;
+import org.example.databaseserver.repos.QuestionSetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Controller
 @RequestMapping("/api/game")
@@ -23,10 +24,13 @@ public class GameController {
     private GameRepository gameRepository;
     @Autowired
     private PlayerController playerController;
+    @Autowired
+    private QuestionSetRepository questionSetRepository;
+
 
     @PostMapping
     public ResponseEntity<Game> openGame() {
-        return ResponseEntity.status(HttpStatus.CREATED).body(gameRepository.save(new Game(null, null, "[]", false)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(gameRepository.save(new Game(null, null, "[]", false, null, false, 0L)));
     }
 
     @GetMapping("/{id}")
@@ -67,16 +71,43 @@ public class GameController {
         ObjectMapper mapper = new ObjectMapper();
 
         for (Map.Entry<String, Object> entry : updates.entrySet()) {
-            switch (entry.getKey()) {
-                case "hasStarted" -> game.hasStarted = (Boolean) entry.getValue();
+            String key = entry.getKey();
+            Object value = entry.getValue();
+
+            switch (key) {
+                case "hasStarted" -> {
+                    if (!(value instanceof Boolean))
+                        throw new IllegalArgumentException("hasStarted must be a boolean");
+                    game.hasStarted = (Boolean) value;
+                }
+
+                case "hasEnded" -> {
+                    if (!(value instanceof Boolean))
+                        throw new IllegalArgumentException("hasEnded must be a boolean");
+                    game.hasEnded = (Boolean) value;
+                }
+
+                case "questionNumber" -> {
+                    if (!(value instanceof Number))
+                        throw new IllegalArgumentException("questionNumber must be a number");
+                    game.questionNumber = ((Number) value).longValue();
+                }
 
                 case "touchComponents" -> {
                     List<Map<String, Object>> components =
-                            mapper.convertValue(entry.getValue(), new TypeReference<>() {});
+                            mapper.convertValue(value, new TypeReference<>() {});
                     game.setTouchComponentsJson(components);
                 }
 
-                default -> throw new IllegalArgumentException("Unknown field: " + entry.getKey());
+                case "questionSet" -> {
+                    if (!(value instanceof Number))
+                        throw new IllegalArgumentException("questionSet must be a number (ID)");
+                    Long qsId = ((Number) value).longValue();
+                    game.questionSet = questionSetRepository.findById(qsId)
+                            .orElseThrow(() -> new IllegalArgumentException("QuestionSet not found: " + qsId));
+                }
+
+                default -> throw new IllegalArgumentException("Unknown field: " + key);
             }
         }
 

@@ -83,3 +83,10 @@ h3 {
     min-width: 350px;
     min-height: 120px;
 }
+
+app-info-card {
+    position: absolute;
+    top: 25px;
+    left: 20px;
+    transform: rotate(-5deg);
+}

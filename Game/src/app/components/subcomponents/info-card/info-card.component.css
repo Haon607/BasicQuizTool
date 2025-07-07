@@ -1,0 +1,15 @@
+#game-id {
+    background-color: var(--primary);
+    color: var(--primary-text);
+    padding: 0 20px;
+    border-radius: 10px;
+    font-size: 50px;
+    font-weight: bold;
+}
+p {
+    font-size: 30px;
+}
+.content {
+    border-radius: 20px;
+    padding: 10px 20px;
+}

@@ -18,7 +18,6 @@ export class LaunchComponent {
   }
 
   launch(set: QuestionSet) {
-    this.memory.questionSet = set;
-    this.router.navigateByUrl('/join');
+    this.router.navigateByUrl('/join/' + set.id);
   }
 }

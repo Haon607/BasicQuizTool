@@ -1,5 +1,5 @@
 import { AfterViewChecked, Component, OnDestroy } from '@angular/core';
-import { Router } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { DatabaseHttpLinkService } from "../../../services/database-http-link.service";
 import { MemoryService } from "../../../services/memory.service";
 import { Game } from "../../../models/DTOs";
@@ -7,7 +7,7 @@ import { DeviceService } from "../../../services/device.service";
 import { gsap } from "gsap";
 import { wait } from "../../../utils";
 import { JoinDevice } from "./join.device";
-import { count, Subject, takeUntil } from "rxjs";
+import { Subject, takeUntil } from "rxjs";
 
 @Component({
     selector: 'app-join.game',
@@ -17,22 +17,26 @@ import { count, Subject, takeUntil } from "rxjs";
     styleUrl: './join.component.css'
 })
 export class JoinComponent implements AfterViewChecked, OnDestroy {
-    private destroy$: Subject<void> = new Subject<void>();
-    private deviceHandler: JoinDevice;
     game?: Game;
+    private deviceHandler: JoinDevice;
     private rendered = false;
+    private destroy$: Subject<void> = new Subject<void>();
     private stopSpinning = false;
 
-    constructor(private router: Router, private db: DatabaseHttpLinkService, private memory: MemoryService, private device: DeviceService) {
+    constructor(
+        private router: Router,
+        private db: DatabaseHttpLinkService,
+        private memory: MemoryService,
+        private device: DeviceService,
+        private activatedRouter: ActivatedRoute
+    ) {
+        let setId: number = Number(activatedRouter.snapshot.paramMap.get('setId')!);
         this.deviceHandler = new JoinDevice(device);
         this.device.incomingTouchComponents.pipe(takeUntil(this.destroy$)).subscribe(components => {
-           this.deviceHandler.handleTabletInput(components, () => this.startGame());
+            this.deviceHandler.handleTabletInput(components, () => this.startGame());
         });
         // db.createGame().subscribe(game => {
-        //     this.game = game;
-        //     this.memory.game = game;
-        // this.startCircle();
-        // this.deviceHandler.sendUiState(game.players);
+// this.setupPage(game, setId);
         // });
         db.getGame(1845).subscribe(game => {
             for (let i = 0; i < 30; i++) {
@@ -43,10 +47,7 @@ export class JoinComponent implements AfterViewChecked, OnDestroy {
                     score: 0,
                 })
             }
-            this.game = game;
-            this.memory.game = game;
-            this.startCircle();
-            this.deviceHandler.sendUiState(game.players);
+            this.setupPage(game, setId);
         });
 
         device.incomingEvents.subscribe(incomingEvent => {
@@ -62,7 +63,7 @@ export class JoinComponent implements AfterViewChecked, OnDestroy {
     }
 
     ngAfterViewChecked() {
-        if (this.game?.players && !this.rendered) {
+        if (this.game?.players && !this.rendered && this.game?.players.length <= 5) {
             this.rendered = true;
             this.positionPlayerCardsInCircle();
         }
@@ -107,9 +108,12 @@ export class JoinComponent implements AfterViewChecked, OnDestroy {
         this.stopSpinning = true;
         gsap.to('#info-card', {scale: 0.1, autoAlpha: 0, ease: "back.in", duration: 1});
         await wait(1000);
-        this.router.navigateByUrl("");
+        this.router.navigateByUrl("intro");
     }
 
+    ngOnDestroy(): void {
+        this.destroy$.next();
+    }
 
     private async startCircle() {
         while (!this.stopSpinning) {
@@ -124,7 +128,12 @@ export class JoinComponent implements AfterViewChecked, OnDestroy {
         this.stopSpinning = false;
     }
 
-    ngOnDestroy(): void {
-        this.destroy$.next();
+    private setupPage(game: Game, setId: number) {
+        this.db.modifyGame(game.id, {questionSet: setId}).subscribe(game => {
+            this.game = game;
+            this.memory.game = game;
+            this.startCircle();
+            this.deviceHandler.sendUiState(game.players);
+        });
     }
 }

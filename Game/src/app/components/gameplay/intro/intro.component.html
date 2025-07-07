@@ -1,0 +1,16 @@
+<div class="base">
+    <app-info-card id="info-card" [game]="game"></app-info-card>
+    <div class="content">
+        <div id="set-container">
+            <h1 id="set">{{ game.questionSet.name }}</h1>
+        </div>
+    </div>
+    <div id="player-card-container">
+        @for (player of game.players; track player.id) {
+
+            <div class="player-card" id="player-card-{{player.id}}" [ngStyle]="{left: game.players.length > 5 ?  '-250px' : '50px'}">
+                <p>{{ player.name }}</p>
+            </div>
+        }
+    </div>
+</div>
