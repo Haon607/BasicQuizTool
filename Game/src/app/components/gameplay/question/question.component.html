@@ -7,7 +7,9 @@
 
     <div class="content" id="answers-card">
         @for (answer of game.questionSet.questions[game.questionNumber].answers; track answer.id) {
-            <p class="answers">{{ answer.answerText }}</p>
+            <div class="answers">
+                <p class="answers-text">{{ answer.answerText }}</p>
+            </div>
         }
     </div>
 </div>

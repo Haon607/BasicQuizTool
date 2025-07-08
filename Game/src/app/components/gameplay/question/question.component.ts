@@ -46,7 +46,9 @@ export class QuestionComponent {
     }
 
     private async setupPage() {
-        await wait(100)
+        await wait(100);
+
+
         this.timer.setupTimer()
         await wait(5000)
         this.timer.startTimer()
