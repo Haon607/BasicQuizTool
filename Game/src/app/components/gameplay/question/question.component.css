@@ -19,12 +19,23 @@
 
 #answers-card {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 columns */
     gap: 10px;
-    width: 80%;
-    height: 50%;
     padding: 20px;
     position: absolute;
+}
+
+.answers-card-picture {
+    grid-template-columns: repeat(1, 1fr);
+    height: 50%;
+    width: 30%;
+    bottom: 225px;
+    left: 20px;
+}
+
+.answers-card-nopicture {
+    grid-template-columns: repeat(2, 1fr);
+    height: 50%;
+    width: 80%;
     bottom: 200px;
 }
 
@@ -42,6 +53,10 @@
 .answers-text {
     font-weight: bold;
     text-align: center;
+}
+
+.answers-text-picture {
+    font-size: 35px;
 }
 
 .answers:nth-child(1) {
@@ -66,4 +81,25 @@
 
 .answers:nth-child(6) {
     background-color: var(--answer6);
+}
+
+#picture-card {
+    position: absolute;
+    width: 60%;
+    height: 72%;
+    right: 50px;
+    bottom: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /*border: #d41938 solid 1px;*/
+}
+
+#picture {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 95%;
+    max-height: 95%;
+    outline: white 15px solid;
 }

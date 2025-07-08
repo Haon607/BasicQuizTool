@@ -14,9 +14,10 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "questionIdSequence")
     public Long id;
     public String questionText;
+    @Column(columnDefinition = "text")
     public String picturePath;
     @OneToMany(cascade = CascadeType.PERSIST)
     public Set<Answer> answers;
     public int time;
-    public Boolean shuffleAnswers;
+    public Boolean showAnswers;
 }

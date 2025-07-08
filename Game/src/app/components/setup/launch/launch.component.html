@@ -3,7 +3,7 @@
         @for (set of sets; track set.id) {
             <button (click)="launch(set)">{{ set.name }}</button>
         } @empty {
-            <p>Warte auf Server...</p>
+            <p>Keine Antwort vom Server</p>
         }
     </div>
 </div>

@@ -9,12 +9,14 @@ import { DeviceService } from "../../../services/device.service";
 import { Router } from "@angular/router";
 import { TimerComponent } from "../../subcomponents/timer/timer.component";
 import { wait } from "../../../utils";
+import { NgClass } from "@angular/common";
 
 @Component({
     selector: 'app-question.component',
     imports: [
         InfoCardComponent,
-        TimerComponent
+        TimerComponent,
+        NgClass
     ],
     templateUrl: './question.component.html',
     standalone: true,
@@ -25,6 +27,7 @@ export class QuestionComponent {
     protected game: Game;
     private destroy$: Subject<void> = new Subject<void>();
     private deviceHandler: QuestionDevice;
+    protected layout: 'answers' | 'pictureAndAnswers' | 'picture' = 'pictureAndAnswers';
 
     constructor(
         private memory: MemoryService,
