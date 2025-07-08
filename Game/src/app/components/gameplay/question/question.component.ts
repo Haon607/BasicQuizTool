@@ -25,9 +25,9 @@ import { NgClass } from "@angular/common";
 export class QuestionComponent {
     @ViewChild(TimerComponent) timer!: TimerComponent;
     protected game: Game;
+    protected layout: 'answers' | 'pictureAndAnswers' | 'picture' = 'pictureAndAnswers';
     private destroy$: Subject<void> = new Subject<void>();
     private deviceHandler: QuestionDevice;
-    protected layout: 'answers' | 'pictureAndAnswers' | 'picture' = 'pictureAndAnswers';
 
     constructor(
         private memory: MemoryService,
@@ -37,16 +37,22 @@ export class QuestionComponent {
     ) {
         this.deviceHandler = new QuestionDevice(device);
         this.game = memory.game!;
+        this.setGame(memory.game!);
         this.device.incomingTouchComponents.pipe(takeUntil(this.destroy$)).subscribe(components => {
             this.deviceHandler.handleTabletInput(components, () => {
             });
         });
         db.getGame(memory.game!.id).subscribe(game => {
-            this.game = game;
+            this.setGame(game);
             this.memory.game = game;
             this.setupPage()
         });
         // this.setupPage();
+    }
+
+    private setGame(game: Game) {
+        this.game = game;
+        this.layout = game.questionSet.questions[game.questionNumber].picturePath ? (game.questionSet.questions[game.questionNumber].showAnswerOptions ? 'pictureAndAnswers' : 'picture') : 'answers'
     }
 
     private async setupPage() {

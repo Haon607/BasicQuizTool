@@ -15,7 +15,7 @@ export class MemoryService {
     set game(value: Game | undefined) {
         this._game = value;
         if (value) {
-            gsap.to("body", {backgroundImage: `url("${value.questionSet.picturePath}")`});
+            gsap.set("body", {backgroundImage: `url("${value.questionSet.picturePath}")`});
         }
     }
 

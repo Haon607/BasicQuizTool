@@ -10,3 +10,5 @@ export const answer3 = "#d89e00";
 export const answer4 = "#26890c";
 export const answer5 = "#0aa3a3";
 export const answer6 = "#864cbf";
+
+export const maxPlayersNeededToNotAnimate = 10;

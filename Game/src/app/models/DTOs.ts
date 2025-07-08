@@ -40,7 +40,7 @@ export interface Question {
     picturePath?: string;
     answers: Answer[];
     time: number;
-    shuffleAnswer: boolean;
+    showAnswerOptions: boolean;
 }
 
 export interface Game {

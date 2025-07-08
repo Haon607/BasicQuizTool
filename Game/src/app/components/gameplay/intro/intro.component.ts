@@ -10,6 +10,7 @@ import { NgStyle } from "@angular/common";
 import { DeviceService } from "../../../services/device.service";
 import { IntroDevice } from "./intro.device";
 import { Router } from "@angular/router";
+import { maxPlayersNeededToNotAnimate } from "../../../../styles";
 
 @Component({
     selector: 'app-intro.component',
@@ -106,4 +107,6 @@ export class IntroComponent implements OnDestroy{
         await wait(1000);
         this.router.navigateByUrl("question/" + this.game.questionNumber);
     }
+
+    //TODO maxPlayersNeededToNotAnimate
 }

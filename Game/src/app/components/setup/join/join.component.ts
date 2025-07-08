@@ -8,6 +8,7 @@ import { gsap } from "gsap";
 import { wait } from "../../../utils";
 import { JoinDevice } from "./join.device";
 import { Subject, takeUntil } from "rxjs";
+import { maxPlayersNeededToNotAnimate } from "../../../../styles";
 
 @Component({
     selector: 'app-join.game',
@@ -68,7 +69,7 @@ export class JoinComponent implements AfterViewChecked, OnDestroy {
     }
 
     ngAfterViewChecked() {
-        if (this.game?.players && !this.rendered && this.game?.players.length <= 5) {
+        if (this.game?.players && !this.rendered && this.game?.players.length <= maxPlayersNeededToNotAnimate) {
             this.rendered = true;
             this.positionPlayerCardsInCircle();
         }
@@ -97,7 +98,7 @@ export class JoinComponent implements AfterViewChecked, OnDestroy {
                     x: `${x}px`,
                     y: `${y}px`,
                     duration: duration,
-                    autoAlpha: players.length <= 5 ? 1 : 0.2 * index - 0.4,
+                    autoAlpha: players.length <= maxPlayersNeededToNotAnimate ? 1 : 0.2 * index - 0.4,
                     ease: "none"
                 });
             }
@@ -123,7 +124,7 @@ export class JoinComponent implements AfterViewChecked, OnDestroy {
     private async startCircle() {
         while (!this.stopSpinning) {
             let duration: number = 1000;
-            if (this.game!.players.length > 5) {
+            if (this.game!.players.length > maxPlayersNeededToNotAnimate) {
                 duration = 60000 / this.game!.players.length;
                 this.game!.players.push(this.game!.players.shift()!);
                 this.positionPlayerCardsInCircle(duration / 1000);
