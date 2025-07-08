@@ -11,6 +11,8 @@ public class QuestionSet {
     public Long id;
     public String name;
     public Boolean sound;
+    @Column(columnDefinition = "text")
+    public String picturePath;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderColumn(name = "question_order")
     public List<Question> questions;

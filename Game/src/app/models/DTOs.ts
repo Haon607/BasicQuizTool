@@ -30,6 +30,7 @@ export interface QuestionSet {
     id: number;
     name: string;
     sound: boolean;
+    picturePath: string;
     questions: Question[];
 }
 

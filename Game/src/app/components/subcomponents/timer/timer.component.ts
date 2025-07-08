@@ -38,7 +38,7 @@ export class TimerComponent {
             const widthPercent = this.getBarLengthInPercent();
             gsap.to("#timer-bar", {
                 width: `${widthPercent}%`,
-                ease: "power1",
+                ease: "power2.out",
                 duration: 1
             });
 

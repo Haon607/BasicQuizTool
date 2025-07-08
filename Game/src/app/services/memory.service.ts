@@ -1,11 +1,23 @@
 import { Injectable } from '@angular/core';
 import { Game } from "../models/DTOs";
+import { gsap } from "gsap";
 
 @Injectable({
     providedIn: 'root'
 })
 export class MemoryService {
-    game?: Game;
+    _game?: Game;
+
+    get game(): Game | undefined {
+        return this._game;
+    }
+
+    set game(value: Game | undefined) {
+        this._game = value;
+        if (value) {
+            gsap.to("body", {backgroundImage: `url("${value.questionSet.picturePath}")`});
+        }
+    }
 
     constructor() {
         this.game = {
@@ -37,7 +49,7 @@ export class MemoryService {
                 "reference": "e7345a1e-3861-4552-8a03-18acdc712ce3"
             }, {"id": "player-host-203", "displayName": "Test", "type": "label", "color": "#a64cb8", "reference": "host"}, {"id": "player-label-204", "displayName": "Du bist drinnen! 1", "type": "label", "color": "#a64cb8", "reference": "c8eb00bd-fdea-4385-b2ac-72168da2ebc8"}, {"id": "player-host-204", "displayName": "1", "type": "label", "color": "#a64cb8", "reference": "host"}, {"id": "player-label-159", "displayName": "Du bist drinnen! 556", "type": "label", "color": "#a64cb8", "reference": "6deb8b64-5210-4fe1-8a7e-70d212debc68"}, {"id": "player-host-159", "displayName": "556", "type": "label", "color": "#a64cb8", "reference": "host"}],
             "hasStarted": true,
-            "questionSet": {"id": 0, "name": "ahfdygag sadfsafasfda asdad", "sound": false, "questions": []},
+            "questionSet": {"id": 0, "name": "ahfdygag sadfsafasfda asdad", "sound": false, picturePath: "", "questions": []},
             "hasEnded": false,
             "questionNumber": 0
         };

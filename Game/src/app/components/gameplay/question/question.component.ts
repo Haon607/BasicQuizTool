@@ -44,8 +44,9 @@ export class QuestionComponent {
         db.getGame(memory.game!.id).subscribe(game => {
             this.game = game;
             this.memory.game = game;
+            this.setupPage()
         });
-        this.setupPage();
+        // this.setupPage();
     }
 
     private async setupPage() {
