@@ -48,7 +48,7 @@
         }
 
         button {
-            flex: 1 1 calc(25% - 40px);
+            /*flex: 1 1 calc(25% - 40px);*/
             min-width: 120px;
             max-width: 300px;
             padding: 20px;
@@ -303,7 +303,11 @@
 
                 if (comp.color) {
                     el.style.backgroundColor = comp.color;
-                    el.style.color = getContrastColor(comp.color);
+                    if (comp.fontColor) {
+                        el.style.color = comp.fontColor;
+                    } else {
+                        el.style.color = getContrastColor(comp.color);
+                    }
                     // console.log(`[Style] Applied custom color: ${comp.color}, text color: ${getContrastColor(comp.color)}`);
                 }
 

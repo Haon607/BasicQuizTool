@@ -10,7 +10,8 @@ export interface TouchComponent {
     sendUpdate?: boolean;
     toolbarButton?: boolean;
     value?: string;
-    reference: string,
+    fontColor?: string;
+    reference: string;
 }
 
 export interface Player {
@@ -40,7 +41,7 @@ export interface Question {
     picturePath?: string;
     answers: Answer[];
     time: number;
-    showAnswerOptions: boolean;
+    showAnswers: boolean;
 }
 
 export interface Game {

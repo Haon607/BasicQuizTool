@@ -15,7 +15,7 @@
         </div>
     }
     @if (layout === 'picture' || layout === 'pictureAndAnswers') {
-        <div id="picture-card">
+        <div id="picture-container" [ngClass]="{'picture-container-small': layout === 'pictureAndAnswers', 'picture-container-large': layout === 'picture'}">
             <img id="picture" class="content" [src]="game.questionSet.questions[game.questionNumber].picturePath" alt="questionimg">
         </div>
     }

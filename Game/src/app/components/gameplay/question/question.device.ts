@@ -1,6 +1,7 @@
 import { DeviceService } from "../../../services/device.service";
-import { Game, Player, TouchComponent } from "../../../models/DTOs";
-import { accent, primary, secondary } from "../../../../styles";
+import { Game, TouchComponent } from "../../../models/DTOs";
+import { getAnswerColorFromIndex, primary } from "../../../../styles";
+import { possibleStates } from "./question.component";
 
 export class QuestionDevice {
     constructor(
@@ -8,55 +9,49 @@ export class QuestionDevice {
     ) {
     }
 
-    handleTabletInput(components: TouchComponent[], startGameCallback: () => void) {
+    handleTabletInput(components: TouchComponent[], advanceState: () => void) {
         components.filter(component => component.pressed && component.reference === 'host').forEach(component => {
             switch (component.id) {
                 case "continue":
-                    startGameCallback();
+                    advanceState();
                     break;
             }
         });
     }
 
-    sendUiState(players: Player[], game: Game): void {
+    sendUiState(nextState: possibleStates, game: Game, currentlyShownToPlayers: { question: boolean; answers: boolean }): void {
         let elements: TouchComponent[] = [
             {
                 id: "continue",
-                displayName: "Weiter",
-                disabled: players.length <= 1,
+                displayName: this.getActionOfNextState(nextState),
                 type: "button",
                 sendUpdate: true,
                 toolbarButton: true,
                 color: primary,
                 reference: 'host'
-            },{
-                id: "headline-gameinfo",
-                displayName: "Spielinfo",
-                type: "label",
-                color: primary,
-                reference: 'host'
-            },{
-                id: "setname",
-                displayName: game.questionSet.name,
-                type: "label",
-                color: secondary,
-                reference: 'host'
-            },{
-                id: "setquestionsnumber",
-                displayName: game.questionSet.questions.length + " Fragen",
-                type: "label",
-                color: secondary,
-                reference: 'host'
-            },{
-                id: "headline-players",
-                displayName: players.length + " Spieler",
-                type: "label",
-                color: primary,
-                reference: 'host'
             },
+            {
+                id: "question-host",
+                displayName: game.questionSet.questions[game.questionNumber].questionText,
+                type: "label",
+                color: '#FFF',
+                fontColor: '#000',
+                reference: 'host'
+            }
         ];
 
-        players.forEach(player => {
+        game.questionSet.questions[game.questionNumber].answers.forEach((answer, index) => {
+            elements.push({
+                id: "answer-host-" + answer.id,
+                displayName: answer.answerText,
+                type: "label",
+                color: getAnswerColorFromIndex(index),
+                reference: 'host',
+                fontColor: '#FFF'
+            })
+        })
+
+        game.players.forEach(player => {
             elements.push({
                 id: "player-name-" + player.id,
                 displayName: player.name + " - " + player.score,
@@ -65,15 +60,50 @@ export class QuestionDevice {
                 toolbarButton: true,
                 reference: player.reference
             });
-            elements.push({
-                id: "player-host-" + player.id,
-                displayName: player.name,
-                type: "label",
-                color: accent,
-                reference: 'host'
-            });
         });
 
+        if (currentlyShownToPlayers.question) {
+            game.players.forEach(player => {
+                elements.push({
+                    id: "player-question-" + player.id,
+                    displayName: game.questionSet.questions[game.questionNumber].questionText,
+                    type: "label",
+                    color: '#FFF',
+                    fontColor: '#000',
+                    reference: player.reference
+                });
+            });
+        }
+
+        if (currentlyShownToPlayers.answers) {
+            game.players.forEach(player => {
+                game.questionSet.questions[game.questionNumber].answers.forEach((answer, index) => {
+                    elements.push({
+                        id: "player-answer-" + player.id + "-" + answer.id,
+                        displayName: answer.answerText,
+                        type: "button",
+                        color: getAnswerColorFromIndex(index),
+                        fontColor: '#FFF',
+                        reference: player.reference,
+                        sendUpdate: true
+                    });
+                });
+            });
+        }
+
         this.device.sendUIState(elements);
+    }
+
+    private getActionOfNextState(nextState: "displayQuestion" | "displayPicture" | "displayAnswerOptions" | "startTimer") {
+        switch (nextState) {
+            case "displayQuestion":
+                return "Frage anzeigen";
+            case "displayPicture":
+                return "Bild anzeigen";
+            case "displayAnswerOptions":
+                return "Antwortmöglichkeiten anzeigen";
+            case "startTimer":
+                return "Zeit starten";
+        }
     }
 }

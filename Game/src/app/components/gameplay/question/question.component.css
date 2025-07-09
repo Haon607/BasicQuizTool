@@ -7,7 +7,7 @@
     right: 20px;
     position: absolute;
     z-index: 1;
-    /*visibility: hidden;*/
+    visibility: hidden;
 }
 
 #question {
@@ -22,6 +22,7 @@
     gap: 10px;
     padding: 20px;
     position: absolute;
+    visibility: hidden;
 }
 
 .answers-card-picture {
@@ -83,16 +84,27 @@
     background-color: var(--answer6);
 }
 
-#picture-card {
+#picture-container {
     position: absolute;
-    width: 60%;
-    height: 72%;
-    right: 50px;
-    bottom: 100px;
     display: flex;
     justify-content: center;
     align-items: center;
     /*border: #d41938 solid 1px;*/
+    transform: rotate(-1deg);
+    visibility: hidden;
+}
+
+.picture-container-small {
+    bottom: 100px;
+    right: 50px;
+    width: 60%;
+    height: 72%;
+}
+
+.picture-container-large {
+    bottom: 50px;
+    width: 90%;
+    height: 80%;
 }
 
 #picture {
@@ -102,4 +114,8 @@
     max-width: 95%;
     max-height: 95%;
     outline: white 15px solid;
+}
+
+#timer {
+    visibility: hidden;
 }

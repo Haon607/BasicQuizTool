@@ -18,7 +18,7 @@ export class TimerComponent {
     constructor() {
     }
 
-    public setupTimer(): void {
+    public async setupTimer() {
         if (this.timerRunning && this.timeLeft > 0) return
         this.timerRunning = false;
         gsap.to("#timer-bar", {width: 100 + "%", duration: 3, ease: "power1.out"});
@@ -26,6 +26,7 @@ export class TimerComponent {
             this.timeLeft = value;
             this.checkFontSize();
         });
+        await wait(3000);
     }
 
     public async startTimer() {

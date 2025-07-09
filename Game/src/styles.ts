@@ -12,3 +12,7 @@ export const answer5 = "#0aa3a3";
 export const answer6 = "#864cbf";
 
 export const maxPlayersNeededToNotAnimate = 10;
+
+export function getAnswerColorFromIndex(index: number) {
+    return [answer1, answer2, answer3, answer4, answer5, answer6][index];
+}
