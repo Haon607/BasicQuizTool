@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { InfoCardComponent } from "../../subcomponents/info-card/info-card.component";
-import { Game } from "../../../models/DTOs";
+import { Game, TouchComponent } from "../../../models/DTOs";
 import { Subject, takeUntil } from "rxjs";
 import { QuestionDevice } from "./question.device";
 import { MemoryService } from "../../../services/memory.service";
@@ -41,7 +41,7 @@ export class QuestionComponent {
         this.deviceHandler = new QuestionDevice(device);
         this.game = memory.game!;
         this.device.incomingTouchComponents.pipe(takeUntil(this.destroy$)).subscribe(components => {
-            this.deviceHandler.handleTabletInput(components, () => this.advanceState());
+            this.deviceHandler.handleTabletInput(components, () => this.advanceState(), (component) => this.setAnswerOfPlayer(component));
         });
         db.getGame(memory.game!.id).subscribe(game => {
             this.setGame(game);
@@ -51,19 +51,21 @@ export class QuestionComponent {
         // this.setupPage();
     }
 
-    private setGame(game: Game) {
+    private async setGame(game: Game) {
         this.game = game;
         this.layout = game.questionSet.questions[game.questionNumber].picturePath ? (game.questionSet.questions[game.questionNumber].showAnswers ? 'pictureAndAnswers' : 'picture') : 'answers';
         this.loadFlowForLayout();
-    }
 
-    private async setupPage() {
         await wait(100);
 
         gsap.set('#question-card', {x: -175, y: 400, rotate: "30deg", scale: 0.1});
         gsap.set('#answers-card', {scale: 0.1, rotate: "-20deg"})
         gsap.set('#timer', {scale: 0.1, y: 200})
-        gsap.set('#picture-container', {scale: 0.1, rotate: "10deg"})
+        if (game.questionSet.questions[game.questionNumber].picturePath) gsap.set('#picture-container', {scale: 0.1, rotate: "10deg"})
+    }
+
+    private async setupPage() {
+        await wait(100);
 
         this.deviceHandler.sendUiState(this.states[0], this.game, this.currentlyShownToPlayers);
     }
@@ -111,6 +113,11 @@ export class QuestionComponent {
                 break;
         }
     }
+
+    private setAnswerOfPlayer(pressedButton: TouchComponent) {
+        this.game.players.filter(player => player.reference === pressedButton.reference)[0].selectedAnswerId = Number(pressedButton.id.split('-')[3]);
+        this.deviceHandler.sendUiState(this.states[0], this.game, this.currentlyShownToPlayers);
+    }
 }
 
-export type possibleStates = 'displayQuestion' | 'displayPicture' | 'displayAnswerOptions' | 'startTimer';
+export type possibleStates = 'displayQuestion' | 'displayPicture' | 'displayAnswerOptions' | 'startTimer' ;

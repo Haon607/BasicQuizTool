@@ -16,6 +16,7 @@ services:
     ports:
       - "23000:23000"
       - "21100:21100"
+    restart: unless-stopped
 
   db:
     image: postgres:latest

@@ -19,6 +19,7 @@ export interface Player {
     name: string;
     reference: string; // UUID
     score: number;
+    selectedAnswerId?: number;
 }
 
 export interface Answer {

@@ -2,6 +2,7 @@ import { DeviceService } from "../../../services/device.service";
 import { Game, TouchComponent } from "../../../models/DTOs";
 import { getAnswerColorFromIndex, primary } from "../../../../styles";
 import { possibleStates } from "./question.component";
+import { ColorFader } from "../../../utils";
 
 export class QuestionDevice {
     constructor(
@@ -9,13 +10,10 @@ export class QuestionDevice {
     ) {
     }
 
-    handleTabletInput(components: TouchComponent[], advanceState: () => void) {
-        components.filter(component => component.pressed && component.reference === 'host').forEach(component => {
-            switch (component.id) {
-                case "continue":
-                    advanceState();
-                    break;
-            }
+    handleTabletInput(components: TouchComponent[], advanceState: () => void, setPlayerAnswer: (component: TouchComponent) => void) {
+        components.filter(component => component.pressed).forEach(component => {
+            if (component.id ==="continue" && component.reference === 'host') advanceState();
+            if (component.id.startsWith("player-answer")) setPlayerAnswer(component);
         });
     }
 
@@ -48,8 +46,8 @@ export class QuestionDevice {
                 color: getAnswerColorFromIndex(index),
                 reference: 'host',
                 fontColor: '#FFF'
-            })
-        })
+            });
+        });
 
         game.players.forEach(player => {
             elements.push({
@@ -82,8 +80,8 @@ export class QuestionDevice {
                         id: "player-answer-" + player.id + "-" + answer.id,
                         displayName: answer.answerText,
                         type: "button",
-                        color: getAnswerColorFromIndex(index),
-                        fontColor: '#FFF',
+                        color: player.selectedAnswerId === answer.id ? ColorFader.adjustBrightness(getAnswerColorFromIndex(index), 100) : getAnswerColorFromIndex(index),
+                        fontColor: player.selectedAnswerId === answer.id ? '#000' : '#FFF',
                         reference: player.reference,
                         sendUpdate: true
                     });

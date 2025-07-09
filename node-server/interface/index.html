@@ -256,8 +256,9 @@
         // console.log('[UI] Cloned components into currentState:', currentState);
 
         components
-            .filter(comp => comp.reference === localStorage.getItem("playerReference"))
             .forEach((comp, index) => {
+                if (comp.reference !== localStorage.getItem("playerReference")) return;
+
                 // console.log(`[UI] Rendering component [${index}]:`, comp);
                 let el;
 
