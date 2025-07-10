@@ -12,12 +12,12 @@ export class QuestionDevice {
 
     handleTabletInput(components: TouchComponent[], advanceState: () => void, setPlayerAnswer: (component: TouchComponent) => void) {
         components.filter(component => component.pressed).forEach(component => {
-            if (component.id ==="continue" && component.reference === 'host') advanceState();
+            if (component.id === "continue" && component.reference === 'host') advanceState();
             if (component.id.startsWith("player-answer")) setPlayerAnswer(component);
         });
     }
 
-    sendUiState(nextState: possibleStates, game: Game, currentlyShownToPlayers: { question: boolean; answers: boolean }): void {
+    sendUiState(nextState: possibleStates, game: Game, currentlyShownToPlayers: { question: boolean; answersSelectable: boolean | null, correctAnswerIds: number[] }): void {
         let elements: TouchComponent[] = [
             {
                 id: "continue",
@@ -41,12 +41,26 @@ export class QuestionDevice {
         game.questionSet.questions[game.questionNumber].answers.forEach((answer, index) => {
             elements.push({
                 id: "answer-host-" + answer.id,
-                displayName: answer.answerText,
+                displayName: currentlyShownToPlayers.answersSelectable !== null ? game.players.filter(player => player.selectedAnswerId === answer.id).length + " - " + answer.answerText + (answer.isCorrect && !currentlyShownToPlayers.answersSelectable ? ' ✓' : '') : answer.answerText,
                 type: "label",
                 color: getAnswerColorFromIndex(index),
                 reference: 'host',
                 fontColor: '#FFF'
             });
+        });
+
+        elements.push({
+            id: "question-details",
+            displayName: "Frage " + (game.questionNumber + 1) + " / " + game.questionSet.questions.length,
+            type: "label",
+            color: '#888',
+            reference: 'host'
+        }, {
+            id: "headline-players",
+            displayName: game.players.filter(player => player.selectedAnswerId).length + " / " + game.players.length + " Spieler",
+            type: "label",
+            color: '#FFF',
+            reference: 'host'
         });
 
         game.players.forEach(player => {
@@ -58,6 +72,14 @@ export class QuestionDevice {
                 toolbarButton: true,
                 reference: player.reference
             });
+            elements.push({
+                id: "player-host-" + player.id,
+                displayName: player.name,
+                type: "label",
+                color: player.selectedAnswerId ? '#fff' : '#222',
+                fontColor: player.selectedAnswerId ? '#000' : '#FFF',
+                reference: 'host'
+            });
         });
 
         if (currentlyShownToPlayers.question) {
@@ -66,20 +88,22 @@ export class QuestionDevice {
                     id: "player-question-" + player.id,
                     displayName: game.questionSet.questions[game.questionNumber].questionText,
                     type: "label",
-                    color: '#FFF',
+                    color: currentlyShownToPlayers.correctAnswerIds.length > 0 ?
+                        (currentlyShownToPlayers.correctAnswerIds.includes(player.selectedAnswerId ?? -1) ? '#0F0' : '#F00')
+                        : '#FFF',
                     fontColor: '#000',
                     reference: player.reference
                 });
             });
         }
 
-        if (currentlyShownToPlayers.answers) {
+        if (currentlyShownToPlayers.answersSelectable !== null) {
             game.players.forEach(player => {
                 game.questionSet.questions[game.questionNumber].answers.forEach((answer, index) => {
                     elements.push({
                         id: "player-answer-" + player.id + "-" + answer.id,
                         displayName: answer.answerText,
-                        type: "button",
+                        type: currentlyShownToPlayers.answersSelectable ? "button" : "label",
                         color: player.selectedAnswerId === answer.id ? ColorFader.adjustBrightness(getAnswerColorFromIndex(index), 100) : getAnswerColorFromIndex(index),
                         fontColor: player.selectedAnswerId === answer.id ? '#000' : '#FFF',
                         reference: player.reference,
@@ -92,7 +116,7 @@ export class QuestionDevice {
         this.device.sendUIState(elements);
     }
 
-    private getActionOfNextState(nextState: "displayQuestion" | "displayPicture" | "displayAnswerOptions" | "startTimer") {
+    private getActionOfNextState(nextState: possibleStates) {
         switch (nextState) {
             case "displayQuestion":
                 return "Frage anzeigen";
@@ -102,6 +126,12 @@ export class QuestionDevice {
                 return "Antwortmöglichkeiten anzeigen";
             case "startTimer":
                 return "Zeit starten";
+            case "endTimer":
+                return "Zeit stoppen";
+            case "showWhatWasPicked":
+                return "Spielerantworten anzeigen";
+            case "showCorrectAnswers":
+                return "Richtige Antworten anzeigen";
         }
     }
 }

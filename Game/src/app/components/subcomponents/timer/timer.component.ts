@@ -29,7 +29,7 @@ export class TimerComponent {
         await wait(3000);
     }
 
-    public async startTimer() {
+    public async startTimer(timeOutCallback: () => void) {
         if (this.timerRunning) return;
         this.timerRunning = true;
 
@@ -45,6 +45,8 @@ export class TimerComponent {
 
             await wait(1000);
         }
+
+        if (this.timerRunning) timeOutCallback();
 
         this.timerRunning = false;
     }
@@ -64,5 +66,9 @@ export class TimerComponent {
             this.textSmaller = false;
             gsap.to("#timer-text-value", {scale: 1});
         }
+    }
+
+    stopTimer() {
+        this.timerRunning = false;
     }
 }

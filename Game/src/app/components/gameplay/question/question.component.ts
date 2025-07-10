@@ -8,9 +8,10 @@ import { DatabaseHttpLinkService } from "../../../services/database-http-link.se
 import { DeviceService } from "../../../services/device.service";
 import { Router } from "@angular/router";
 import { TimerComponent } from "../../subcomponents/timer/timer.component";
-import { wait } from "../../../utils";
+import { ColorFader, wait } from "../../../utils";
 import { NgClass } from "@angular/common";
 import { gsap } from "gsap";
+import { getAnswerColorFromIndex } from "../../../../styles";
 
 @Component({
     selector: 'app-question.component',
@@ -28,7 +29,7 @@ export class QuestionComponent {
     protected game: Game;
     protected layout: 'answers' | 'pictureAndAnswers' | 'picture' = 'answers';
     protected states: possibleStates[] = [];
-    protected currentlyShownToPlayers: { question: boolean, answers: boolean } = {question: false, answers: false};
+    protected currentlyShownToPlayers: { question: boolean, answersSelectable: boolean | null, correctAnswerIds: number[] } = {question: false, answersSelectable: null, correctAnswerIds: []};
     private destroy$: Subject<void> = new Subject<void>();
     private deviceHandler: QuestionDevice;
 
@@ -67,7 +68,7 @@ export class QuestionComponent {
     private async setupPage() {
         await wait(100);
 
-        this.deviceHandler.sendUiState(this.states[0], this.game, this.currentlyShownToPlayers);
+        this.updateUI();
     }
 
     private async advanceState() {
@@ -80,44 +81,83 @@ export class QuestionComponent {
                 gsap.to('#question-card', {x: 0, y: 0, rotate: "2deg", scale: 1, ease: "back.out"});
                 await wait(500);
                 gsap.to('#picture-container', {x: 0, y: 0, autoAlpha: 1, rotate: "-1deg", scale: 1, ease: "back.out"});
-                if (this.layout === 'picture') this.currentlyShownToPlayers.answers = true;
+                if (this.layout === 'picture') this.currentlyShownToPlayers.answersSelectable = true;
                 break;
             case 'displayAnswerOptions':
                 gsap.to('#question-card', {x: 0, y: 0, rotate: "2deg", scale: 1, ease: "back.out"});
                 await wait(500);
                 gsap.to('#answers-card', {scale: 1, rotate: 0, autoAlpha: 1, ease: "back.out"})
-                this.currentlyShownToPlayers.answers = true;
+                this.currentlyShownToPlayers.answersSelectable = true;
                 break;
             case 'startTimer':
-                this.timer.startTimer();
+                this.timer.startTimer(() => this.advanceState());
+                break;
+            case "endTimer":
+                this.timer.stopTimer();
+                this.currentlyShownToPlayers.answersSelectable = false;
+                this.updateUI();
+                await wait(1500);
+                gsap.to('#timer', {scale: 0.1, y: 200, ease: "back.in"});
+                break;
+            case "showWhatWasPicked":
+                this.setGradientOnAnswers();
+                break;
+            case "showCorrectAnswers":
+                this.currentlyShownToPlayers.correctAnswerIds = this.game.questionSet.questions[this.game.questionNumber].answers.filter(answer => answer.isCorrect).map(answer => answer.id);
+                this.setOutlineOnCorrectAnswers();
+                break;
         }
+        this.updateUI();
         this.states.shift();
-        if(this.states[0] === 'startTimer') {
+        if (this.states[0] === 'startTimer') {
             await wait(500);
             gsap.to('#timer', {scale: 1, y: 0, autoAlpha: 1, ease: "back.out"})
             await this.timer.setupTimer();
         }
+        this.updateUI();
+    }
+
+    private updateUI() {
         this.deviceHandler.sendUiState(this.states[0], this.game, this.currentlyShownToPlayers);
     }
 
     private loadFlowForLayout() {
         switch (this.layout) {
             case 'answers':
-                this.states = ['displayQuestion', 'displayAnswerOptions', 'startTimer'];
+                this.states = ['displayQuestion', 'displayAnswerOptions', 'startTimer', 'endTimer', 'showWhatWasPicked', 'showCorrectAnswers', 'displayScoreboard'];
                 break;
             case 'pictureAndAnswers':
-                this.states = ['displayQuestion', 'displayPicture', 'displayAnswerOptions', 'startTimer'];
+                this.states = ['displayQuestion', 'displayPicture', 'displayAnswerOptions', 'startTimer', 'endTimer', 'showWhatWasPicked', 'showCorrectAnswers', 'displayScoreboard'];
                 break;
             case 'picture':
-                this.states = ['displayQuestion', 'displayPicture', 'startTimer'];
+                this.states = ['displayQuestion', 'displayPicture', 'startTimer', 'endTimer', 'showWhatWasPicked', 'showCorrectAnswers', 'displayScoreboard'];
                 break;
         }
     }
 
     private setAnswerOfPlayer(pressedButton: TouchComponent) {
         this.game.players.filter(player => player.reference === pressedButton.reference)[0].selectedAnswerId = Number(pressedButton.id.split('-')[3]);
-        this.deviceHandler.sendUiState(this.states[0], this.game, this.currentlyShownToPlayers);
+        this.updateUI();
+    }
+
+    private setGradientOnAnswers() {
+        const whole = this.game.players.length;
+        this.game.questionSet.questions[this.game.questionNumber].answers.forEach((answer, index) => {
+            const part = this.game.players.filter(player => player.selectedAnswerId === answer.id).length;
+            gsap.to('#answer-' + answer.id, {background: "linear-gradient(90deg, " + getAnswerColorFromIndex(index) + ',  ' + getAnswerColorFromIndex(index) + ' ' + (part / whole * 100) + '%,  ' + ColorFader.adjustBrightness(getAnswerColorFromIndex(index), -50) + ' ' + (part / whole * 100) + '%)'})
+        });
+    }
+
+    private setOutlineOnCorrectAnswers() {
+        const whole = this.game.players.length;
+        this.game.questionSet.questions[this.game.questionNumber].answers.forEach((answer, index) => {
+            const part = this.game.players.filter(player => player.selectedAnswerId === answer.id).length;
+            if (answer.isCorrect) gsap.to('#answer-' + answer.id, {background: "linear-gradient(90deg, " + ColorFader.adjustBrightness(getAnswerColorFromIndex(index), +75) + ',  ' + ColorFader.adjustBrightness(getAnswerColorFromIndex(index), +100) + ' ' + (part / whole * 100) + '%,  ' + ColorFader.adjustBrightness(getAnswerColorFromIndex(index), +0) + ' ' + (part / whole * 100) + '%)'})
+            else gsap.to('#answer-' + answer.id, {background: "linear-gradient(90deg, " + ColorFader.adjustBrightness(getAnswerColorFromIndex(index), -0) + ',  ' + ColorFader.adjustBrightness(getAnswerColorFromIndex(index), -25) + ' ' + (part / whole * 100) + '%,  ' + ColorFader.adjustBrightness(getAnswerColorFromIndex(index), -75) + ' ' + (part / whole * 100) + '%)'})
+
+
+        });
     }
 }
 
-export type possibleStates = 'displayQuestion' | 'displayPicture' | 'displayAnswerOptions' | 'startTimer' ;
+export type possibleStates = 'displayQuestion' | 'displayPicture' | 'displayAnswerOptions' | 'startTimer' | 'endTimer' | 'showWhatWasPicked' | 'showCorrectAnswers' | 'displayScoreboard';

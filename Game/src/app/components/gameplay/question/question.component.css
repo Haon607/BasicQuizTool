@@ -61,27 +61,27 @@
 }
 
 .answers:nth-child(1) {
-    background-color: var(--answer1);
+    background: linear-gradient(90deg, var(--answer1), var(--answer1) 100%, var(--answer1) 100%);
 }
 
 .answers:nth-child(2) {
-    background-color: var(--answer2);
+    background: linear-gradient(90deg, var(--answer2), var(--answer2) 100%, var(--answer2) 100%);
 }
 
 .answers:nth-child(3) {
-    background-color: var(--answer3);
+    background: linear-gradient(90deg, var(--answer3), var(--answer3) 100%, var(--answer3) 100%);
 }
 
 .answers:nth-child(4) {
-    background-color: var(--answer4);
+    background: linear-gradient(90deg, var(--answer4), var(--answer4) 100%, var(--answer4) 100%);
 }
 
 .answers:nth-child(5) {
-    background-color: var(--answer5);
+    background: linear-gradient(90deg, var(--answer5), var(--answer5) 100%, var(--answer5) 100%);
 }
 
 .answers:nth-child(6) {
-    background-color: var(--answer6);
+    background: linear-gradient(90deg, var(--answer6), var(--answer6) 100%, var(--answer6) 100%);
 }
 
 #picture-container {

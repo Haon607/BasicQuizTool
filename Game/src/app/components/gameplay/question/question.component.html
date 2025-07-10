@@ -8,7 +8,7 @@
     @if (layout !== 'picture') {
         <div class="content" id="answers-card" [ngClass]="{'answers-card-nopicture': layout === 'answers', 'answers-card-picture': layout === 'pictureAndAnswers'}">
             @for (answer of game.questionSet.questions[game.questionNumber].answers; track answer.id) {
-                <div class="answers">
+                <div class="answers" id="answer-{{answer.id}}">
                     <p class="answers-text" [ngClass]="{'answers-text-picture': layout === 'pictureAndAnswers'}">{{ answer.answerText }}</p>
                 </div>
             }
