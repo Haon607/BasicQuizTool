@@ -1,0 +1,102 @@
+import { Component } from '@angular/core';
+import { Player } from "../../../models/DTOs";
+import gsap from "gsap";
+import { wait } from "../../../utils";
+import { secondary } from "../../../../styles";
+
+@Component({
+    selector: 'app-scoreboard',
+    imports: [],
+    templateUrl: './scoreboard.component.html',
+    standalone: true,
+    styleUrl: './scoreboard.component.css'
+})
+export class ScoreboardComponent {
+    protected players: ScoreboardPlayer[] = [];
+    protected currentQuestionNumber: number = 0;
+    protected totalQuestionNumber: number = 0;
+
+    public setQuestionNumbers(currentQuestionNumber: number, totalQuestionNumber: number) {
+        this.currentQuestionNumber = currentQuestionNumber;
+        this.totalQuestionNumber = totalQuestionNumber;
+    }
+
+    public setPlayers(players: ScoreboardPlayer[], hasCorrect: boolean) {
+        this.players = players;
+        // for (let i = 0; i < 100; i++) this.players.push({id: i * 500, placement: i + 9, isCorrect: false, score: i, name: Math.pow(2, i) + ""})
+        this.updatePlayers(hasCorrect);
+    }
+
+    private async updatePlayers(hasCorrect: boolean) {
+        await wait(100);
+        for (const player of this.players) {
+            if (this.players.length <= 14) this.excel14Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
+            else if (this.players.length <= 24) this.excel24Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
+            else if (this.players.length <= 40) this.excel40Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
+            else if (this.players.length <= 65) this.excel65Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
+            else if (this.players.length <= 90) this.excel90Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
+            else if (this.players.length <= 160) this.excel160Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
+            else this.excel40Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
+        }
+    }
+
+    private excel14Placement(player: ScoreboardPlayer, i: number, isOnTopPlace: boolean, hasCorrect: boolean) {
+        this.placeEntryPerExcelWith(player.id, i, 1.2, -250, 650, -450, 150, 7, player.isCorrect, isOnTopPlace, hasCorrect)
+    }
+
+    private excel24Placement(player: ScoreboardPlayer, i: number, isOnTopPlace: boolean, hasCorrect: boolean) {
+        this.placeEntryPerExcelWith(player.id, i, 1, -380, 520, -450, 130, 8, player.isCorrect, isOnTopPlace, hasCorrect)
+    }
+
+    private excel40Placement(player: ScoreboardPlayer, i: number, isOnTopPlace: boolean, hasCorrect: boolean) {
+        this.placeEntryPerExcelWith(player.id, i, 0.75, -450, 395, -450, 100, 10, player.isCorrect, isOnTopPlace, hasCorrect)
+    }
+
+    private excel65Placement(player: ScoreboardPlayer, i: number, isOnTopPlace: boolean, hasCorrect: boolean) {
+        this.placeEntryPerExcelWith(player.id, i, 0.6, -470, 310, -480, 80, 13, player.isCorrect, isOnTopPlace, hasCorrect)
+    }
+
+    private excel90Placement(player: ScoreboardPlayer, i: number, isOnTopPlace: boolean, hasCorrect: boolean) {
+        this.placeEntryPerExcelWith(player.id, i, 0.5, -500, 260, -490, 70, 15, player.isCorrect, isOnTopPlace, hasCorrect)
+    }
+
+    private excel160Placement(player: ScoreboardPlayer, i: number, isOnTopPlace: boolean, hasCorrect: boolean) {
+        this.placeEntryPerExcelWith(player.id, i, 0.4, -570, 203, -515, 54, 20, player.isCorrect, isOnTopPlace, hasCorrect)
+    }
+
+    private placeEntryPerExcelWith(playerId: number, i: number, scale: number, initX: number, xDisplacement: number, initY: number, yDisplacement: number, elementsPerColumn: number, isCorrect: boolean, isOnTopPlace: boolean, hasCorrect: boolean) {
+        gsap.set('#player-card-' + playerId, {zIndex: this.players.length - i});
+        gsap.to('#player-card-' + playerId,
+            {
+                x: initX + (xDisplacement * Math.floor(i / elementsPerColumn)),
+                y: initY + ((i - (elementsPerColumn * Math.floor(i / elementsPerColumn))) * yDisplacement),
+                rotate: 0,
+                autoAlpha: 1,
+                scale: scale,
+                outline: hasCorrect ? (isCorrect ? "#0F0 20px solid" : secondary + " 20px solid") : (isOnTopPlace ? "#FFF 20px solid" : secondary + " 20px solid"),
+                ease: "power1",
+            }
+        );
+    }
+
+}
+
+export interface ScoreboardPlayer {
+    id: number;
+    name: string;
+    score: number;
+    isCorrect: boolean;
+    placement: number;
+}
+
+export function convertPlayerToScoreboardPlayers(player: Player[], correctAnswerIds?: number[]): ScoreboardPlayer[] {
+    return player.map((player, index) => {
+        return {
+            id: player.id,
+            isCorrect: correctAnswerIds ? (correctAnswerIds.includes(player.selectedAnswerId ?? -1)) : false,
+            score: player.score,
+            placement: index,
+            name: player.name,
+        }
+    })
+}

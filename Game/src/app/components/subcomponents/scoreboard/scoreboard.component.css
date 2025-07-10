@@ -1,0 +1,23 @@
+.base {
+    background: #000000A0;
+}
+
+.player-card {
+    position: absolute;
+    width: 500px;
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    box-shadow: none;
+    visibility: hidden;
+    outline-offset: -20px;
+}
+
+.player-name {
+    flex-grow: 1;
+}
+
+.player-score {
+    width: 30%;
+    font-weight: bolder;
+}

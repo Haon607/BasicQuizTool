@@ -53,13 +53,14 @@ export class QuestionDevice {
             id: "question-details",
             displayName: "Frage " + (game.questionNumber + 1) + " / " + game.questionSet.questions.length,
             type: "label",
-            color: '#888',
+            color: '#000',
             reference: 'host'
         }, {
             id: "headline-players",
             displayName: game.players.filter(player => player.selectedAnswerId).length + " / " + game.players.length + " Spieler",
             type: "label",
-            color: '#FFF',
+            color: '#000',
+            fontColor: '#FFF',
             reference: 'host'
         });
 
@@ -132,6 +133,12 @@ export class QuestionDevice {
                 return "Spielerantworten anzeigen";
             case "showCorrectAnswers":
                 return "Richtige Antworten anzeigen";
+            case "displayScoreboard":
+                return "Punktestand anzeigen";
+            case "addScores":
+                return "Punkte addieren";
+            case "nextRound":
+                return "Weiter";
         }
     }
 }

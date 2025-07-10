@@ -54,3 +54,19 @@ export interface Game {
     hasEnded: boolean;
     questionNumber: number;
 }
+
+export const dummyGame: Game = {
+    id: NaN,
+    players: [],
+    touchComponents: [],
+    hasStarted: false,
+    questionSet: {
+        id: NaN,
+        name: "",
+        sound: false,
+        picturePath: "",
+        questions: []
+    },
+    hasEnded: false,
+    questionNumber: NaN,
+}

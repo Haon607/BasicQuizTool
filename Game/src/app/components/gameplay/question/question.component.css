@@ -119,3 +119,8 @@
 #timer {
     visibility: hidden;
 }
+
+#scoreboard {
+    z-index: 20;
+    visibility: hidden;
+}

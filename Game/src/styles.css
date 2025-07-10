@@ -100,7 +100,7 @@ app-info-card {
     top: 25px;
     left: 20px;
     transform: rotate(-5deg);
-    z-index: 10;
+    z-index: 100;
 }
 
 app-timer {
@@ -110,4 +110,9 @@ app-timer {
     height: 5%;
     transform: rotate(1deg);
     z-index: 5;
+}
+
+app-scoreboard {
+    height: 100%;
+    width: 100%;
 }

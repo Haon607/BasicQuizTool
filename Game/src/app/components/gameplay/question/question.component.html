@@ -1,6 +1,7 @@
 <div class="base">
     <app-info-card [game]="game"></app-info-card>
     <app-timer id="timer" [maxTime]="game.questionSet.questions[game.questionNumber].time"></app-timer>
+    <app-scoreboard id="scoreboard"></app-scoreboard>
     <div class="content" id="question-card">
         <h4 id="question">{{ game.questionSet.questions[game.questionNumber].questionText }}</h4>
     </div>

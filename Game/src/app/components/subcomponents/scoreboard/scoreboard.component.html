@@ -1,0 +1,17 @@
+<div class="base">
+    @for (player of players; track player.id) {
+        <div class="player-card" id="player-card-{{player.id}}">
+            <p class="player-name">
+                {{player.name}}
+            </p>
+            <p class="player-score">
+                {{player.score}}
+            </p>
+        </div>
+    }
+    <div class="content">
+        <p>Frage:</p>
+        <h3>{{currentQuestionNumber}}</h3>
+        <h4>/ {{totalQuestionNumber}}</h4>
+    </div>
+</div>
