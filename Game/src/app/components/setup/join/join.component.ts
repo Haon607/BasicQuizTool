@@ -19,6 +19,7 @@ import { maxPlayersNeededToNotAnimate } from "../../../../styles";
 })
 export class JoinComponent implements AfterViewChecked, OnDestroy {
     game?: Game;
+    protected showQrCodes: boolean = false;
     private deviceHandler: JoinDevice;
     private rendered = false;
     private destroy$: Subject<void> = new Subject<void>();
@@ -34,7 +35,7 @@ export class JoinComponent implements AfterViewChecked, OnDestroy {
         let setId: number = Number(activatedRouter.snapshot.paramMap.get('setId')!);
         this.deviceHandler = new JoinDevice(device);
         this.device.incomingTouchComponents.pipe(takeUntil(this.destroy$)).subscribe(components => {
-            this.deviceHandler.handleTabletInput(components, () => this.startGame());
+            this.deviceHandler.handleTabletInput(components, () => this.startGame(), () => this.toggleQrCode());
         });
         // db.createGame().subscribe(game => {
 // this.setupPage(game, setId);
@@ -110,6 +111,7 @@ export class JoinComponent implements AfterViewChecked, OnDestroy {
         });
         this.device.sendEmptyUi();
         gsap.to('#player-card-container', {scale: 0.1, autoAlpha: 0, ease: "back.in", duration: 1});
+        gsap.to("#qr-code-container", {scale: 0.1, autoAlpha: 0, ease: "back.in"})
         await wait(1000);
         this.stopSpinning = true;
         gsap.to('#info-card', {scale: 0.1, autoAlpha: 0, ease: "back.in", duration: 1});
@@ -140,6 +142,13 @@ export class JoinComponent implements AfterViewChecked, OnDestroy {
             this.memory.game = game;
             this.startCircle();
             this.deviceHandler.sendUiState(game.players);
+            gsap.set("#qr-code-container", {scale: 0.1});
         });
+    }
+
+    private toggleQrCode() {
+        this.showQrCodes = !this.showQrCodes;
+        if (this.showQrCodes) gsap.to("#qr-code-container", {scale: 1, autoAlpha: 1, ease: "back.out"})
+        else gsap.to("#qr-code-container", {scale: 0.1, autoAlpha: 0, ease: "back.in"})
     }
 }

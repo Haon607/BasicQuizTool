@@ -24,3 +24,29 @@ h1 {
     padding: 0 80px;
     border-radius: 20px;
 }
+
+#qr-code-container {
+    position: absolute;
+    height: 40%;
+    width: 60%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    bottom: 20px;
+    background: white;
+    visibility: hidden;
+}
+
+.single-qr-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.qr-code {
+    height: 100%;
+}

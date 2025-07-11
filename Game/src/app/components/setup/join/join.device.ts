@@ -1,6 +1,6 @@
 import { DeviceService } from "../../../services/device.service";
 import { Player, TouchComponent } from "../../../models/DTOs";
-import { accent, primary } from "../../../../styles";
+import { accent, primary, secondary } from "../../../../styles";
 
 export class JoinDevice {
     constructor(
@@ -8,12 +8,15 @@ export class JoinDevice {
     ) {
     }
 
-    handleTabletInput(components: TouchComponent[], startGameCallback: () => void) {
+    handleTabletInput(components: TouchComponent[], startGameCallback: () => void, toggleQrCodes: () => void) {
         components.filter(component => component.pressed && component.reference === 'host').forEach(component => {
             switch (component.id) {
                 case "startgame":
                     startGameCallback();
                     this.device.sendEmptyUi();
+                    break;
+                case "toggleqrcodes":
+                    toggleQrCodes();
                     break;
             }
         });
@@ -22,6 +25,14 @@ export class JoinDevice {
     sendUiState(players: Player[]): void {
         let elements: TouchComponent[] = [
             {
+                id: "toggleqrcodes",
+                displayName: "Qr-Codes",
+                type: "button",
+                sendUpdate: true,
+                toolbarButton: true,
+                color: secondary,
+                reference: 'host'
+            },{
                 id: "startgame",
                 displayName: "Spiel starten",
                 disabled: players.length <= 1,
