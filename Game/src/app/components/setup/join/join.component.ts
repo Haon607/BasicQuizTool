@@ -37,20 +37,20 @@ export class JoinComponent implements AfterViewChecked, OnDestroy {
         this.device.incomingTouchComponents.pipe(takeUntil(this.destroy$)).subscribe(components => {
             this.deviceHandler.handleTabletInput(components, () => this.startGame(), () => this.toggleQrCode());
         });
-        // db.createGame().subscribe(game => {
-// this.setupPage(game, setId);
-        // });
-        db.getGame(1845).subscribe(game => {
-            for (let i = 0; i < 30; i++) {
-                game.players.push({
-                    id: i + 100,
-                    name: Math.pow(2, i).toString(16),
-                    reference: "",
-                    score: 0,
-                })
-            }
+        db.createGame().subscribe(game => {
             this.setupPage(game, setId);
         });
+        // db.getGame(1845).subscribe(game => {
+        //     for (let i = 0; i < 30; i++) {
+        //         game.players.push({
+        //             id: i + 100,
+        //             name: Math.pow(2, i).toString(16),
+        //             reference: "",
+        //             score: 0,
+        //         })
+        //     }
+        //     this.setupPage(game, setId);
+        // });
 
         device.incomingEvents.subscribe(incomingEvent => {
             if (incomingEvent.event === 'player-joined') {

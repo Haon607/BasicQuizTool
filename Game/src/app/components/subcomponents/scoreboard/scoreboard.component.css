@@ -28,6 +28,7 @@
     left: 20px;
     bottom: 20px;
     transform: rotate(2deg);
+    z-index: 2;
     visibility: hidden;
 }
 
@@ -42,4 +43,32 @@
 
 #question-number-headline, #question-number-total {
     font-size: 30px;
+}
+
+#set-container-container {
+    padding: 30px;
+    gap: 10px;
+    width: 40%;
+    top: 325px;
+    left: -270px;
+    position: absolute;
+    rotate: 90deg;
+    z-index: 1;
+    visibility: hidden;
+}
+
+#set-container {
+    width: 100%;
+    height: 100%;
+}
+
+#set {
+    background-color: var(--primary);
+    border: none;
+    border-radius: 30px;
+    color: var(--primary-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }

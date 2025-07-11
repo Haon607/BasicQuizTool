@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -29,27 +28,24 @@ public class GameController {
 
     @PostMapping
     public ResponseEntity<Game> openGame() {
-        return ResponseEntity.status(HttpStatus.CREATED).body(gameRepository.save(new Game(null, null, "[]", false, null, false, 0L)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(gameRepository.save(new Game(null, null, "[]", false, null, 0L)));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Game> getGame(@PathVariable Long id) {
         Game game = gameRepository.findById(id).orElseThrow(RuntimeException::new);
-        validateGameNotEnded(game);
         return ResponseEntity.ok(game);
     }
 
     @GetMapping("/touchComponents/{id}")
     public ResponseEntity<Object> getGamesTouchComponents(@PathVariable Long id) throws JsonProcessingException {
         Game game = gameRepository.findById(id).orElseThrow(RuntimeException::new);
-        validateGameNotEnded(game);
         return ResponseEntity.ok(game.getTouchComponentsJson());
     }
 
     @PutMapping("/{id}/{pId}")
     public ResponseEntity<Game> addPlayerToGame(@PathVariable Long id, @PathVariable Long pId) {
         Game game = gameRepository.findById(id).orElseThrow();
-        validateGameNotEnded(game);
         Player player = playerController.getPlayer(pId).getBody();
         game.players.add(player);
         gameRepository.save(game);
@@ -59,7 +55,6 @@ public class GameController {
     @PutMapping("/{id}")
     public ResponseEntity<Game> setTouchComponents(@PathVariable Long id, @RequestBody String touchComponents) {
         Game game = gameRepository.findById(id).orElseThrow();
-        validateGameNotEnded(game);
         game.touchComponents = touchComponents;
         gameRepository.save(game);
         return ResponseEntity.ok(game);
@@ -73,8 +68,6 @@ public class GameController {
         Game game = gameRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Game not found"));
 
-        validateGameNotEnded(game);
-
         ObjectMapper mapper = new ObjectMapper();
 
         for (Map.Entry<String, Object> entry : updates.entrySet()) {
@@ -86,12 +79,6 @@ public class GameController {
                     if (!(value instanceof Boolean))
                         throw new IllegalArgumentException("hasStarted must be a boolean");
                     game.hasStarted = (Boolean) value;
-                }
-
-                case "hasEnded" -> {
-                    if (!(value instanceof Boolean))
-                        throw new IllegalArgumentException("hasEnded must be a boolean");
-                    game.hasEnded = (Boolean) value;
                 }
 
                 case "questionNumber" -> {
@@ -120,12 +107,5 @@ public class GameController {
 
         gameRepository.save(game);
         return ResponseEntity.ok(game);
-    }
-
-    /** Prevent access to ended games */
-    private void validateGameNotEnded(Game game) {
-        if (game.hasEnded) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Game has ended and cannot be accessed or modified.");
-        }
     }
 }

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Game } from "../models/DTOs";
 import { gsap } from "gsap";
+import { Router } from "@angular/router";
 
 @Injectable({
     providedIn: 'root'
@@ -16,9 +17,11 @@ export class MemoryService {
         this._game = value;
         if (value) {
             gsap.set("body", {backgroundImage: `url("${value.questionSet.picturePath}")`});
+            if (value.questionNumber < value.questionSet.questions.length) {}
+            else this.router.navigateByUrl('scoreboard/' + value.id);
         }
     }
 
-    constructor() {
+    constructor(private router: Router) {
     }
 }

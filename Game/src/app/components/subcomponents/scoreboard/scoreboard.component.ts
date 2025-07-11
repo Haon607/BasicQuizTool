@@ -1,8 +1,13 @@
-import { Component } from '@angular/core';
-import { Player } from "../../../models/DTOs";
+import { AfterViewInit, Component } from '@angular/core';
+import { Game, Player } from "../../../models/DTOs";
 import gsap from "gsap";
 import { wait } from "../../../utils";
 import { secondary } from "../../../../styles";
+import { ActivatedRoute } from "@angular/router";
+import { MemoryService } from "../../../services/memory.service";
+import { DatabaseHttpLinkService } from "../../../services/database-http-link.service";
+import { DeviceService } from "../../../services/device.service";
+import { ScoreboardDevice } from "./scoreboard.device";
 
 @Component({
     selector: 'app-scoreboard',
@@ -11,10 +16,31 @@ import { secondary } from "../../../../styles";
     standalone: true,
     styleUrl: './scoreboard.component.css'
 })
-export class ScoreboardComponent {
+export class ScoreboardComponent implements AfterViewInit {
     protected players: ScoreboardPlayer[] = [];
     protected currentQuestionNumber: number = 0;
     protected totalQuestionNumber: number = 0;
+    private deviceHandler: ScoreboardDevice;
+    protected setName: string = "";
+
+    constructor(private route: ActivatedRoute, private memory: MemoryService, private db: DatabaseHttpLinkService, private device: DeviceService) {
+        this.deviceHandler = new ScoreboardDevice(device);
+    }
+
+    ngAfterViewInit() {
+        if (this.route.component === this.constructor) {
+            const id = Number(this.route.snapshot.paramMap.get('gameid')!);
+            if (this.memory.game) {
+                this.fillScoreboardWithGameData(this.memory.game);
+            } else {
+                this.db.getGame(id).subscribe(game => {
+                    this.memory.game = game;
+                    this.fillScoreboardWithGameData(game);
+                });
+            }
+            this.setPlayers(convertPlayerToScoreboardPlayers(this.memory.game!.players), false)
+        }
+    }
 
     public setQuestionNumbers(currentQuestionNumber: number, totalQuestionNumber: number) {
         this.currentQuestionNumber = currentQuestionNumber;
@@ -22,11 +48,16 @@ export class ScoreboardComponent {
         gsap.set('#question-number-card', {scale: 0.1});
     }
 
+    public setSet(setName: string) {
+        this.setName = setName;
+        gsap.set('#set-container-container', {scale: 0.1});
+        gsap.to('#set-container-container', {scale: 1, rotate: "-87deg", autoAlpha: 1, ease: "back.out"});
+    }
+
     public setPlayers(players: ScoreboardPlayer[], hasCorrect: boolean) {
         this.players = players;
-        // for (let i = 0; i < 100; i++) this.players.push({id: i * 500, placement: i + 9, isCorrect: false, score: i, name: Math.pow(2, i) + ""})
         this.updatePlayers(hasCorrect);
-        gsap.to('#question-number-card', {scale: 1, autoAlpha: 1, ease: "back.out"});
+        gsap.to('#question-number-card', {scale: 1, rotate: this.route.component === this.constructor ? "-2deg" : "2deg", autoAlpha: 1, ease: "back.out"});
     }
 
     private async updatePlayers(hasCorrect: boolean) {
@@ -83,6 +114,13 @@ export class ScoreboardComponent {
         );
     }
 
+    private async fillScoreboardWithGameData(game: Game) {
+        this.setQuestionNumbers(game.questionNumber - 1, game.questionSet.questions.length);
+        game.players.sort((a, b) => b.score - a.score);
+        this.setSet(game.questionSet.name);
+        this.setPlayers(convertPlayerToScoreboardPlayers(game.players), false);
+        this.deviceHandler.sendUiState(game.players, game.questionSet.name);
+    }
 }
 
 export interface ScoreboardPlayer {

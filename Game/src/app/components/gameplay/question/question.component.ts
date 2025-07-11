@@ -144,7 +144,7 @@ export class QuestionComponent implements OnDestroy {
                 break;
 
             case 'showWhatWasPickedPicture':
-                gsap.to("#answers-container", {y: 0, x: 1, rotate: "-1deg", ease: "back.out"})
+                gsap.to("#answers-container", {y: 0, x: 1, autoAlpha: 1, rotate: "-1deg", ease: "back.out"})
                 gsap.to("#picture-container", {width: "70%", x: 250, rotate: "1deg", ease: "back.out"})
                 this.setGradientOnAnswers(true);
                 break;
@@ -185,7 +185,8 @@ export class QuestionComponent implements OnDestroy {
                 });
                 this.db.modifyGame(this.game.id, {'questionNumber': this.game.questionNumber}).subscribe(() => {
                     this.router.navigateByUrl('dummy', {skipLocationChange: true}).then(() => {
-                        this.router.navigateByUrl('question/' + this.game.id);
+                        if (this.game.questionNumber < this.game.questionSet.questions.length) this.router.navigateByUrl('question/' + this.game.id)
+                        else this.router.navigateByUrl('scoreboard/' + this.game.id);
                     });
                 });
                 break;

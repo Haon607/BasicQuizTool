@@ -52,7 +52,6 @@ export interface Game {
     touchComponents: TouchComponent[];
     hasStarted: boolean;
     questionSet: QuestionSet;
-    hasEnded: boolean;
     questionNumber: number;
 }
 
@@ -68,6 +67,5 @@ export const dummyGame: Game = {
         picturePath: "",
         questions: []
     },
-    hasEnded: false,
     questionNumber: NaN,
 }
