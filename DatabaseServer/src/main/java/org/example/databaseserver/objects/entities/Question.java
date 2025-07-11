@@ -16,6 +16,8 @@ public class Question {
     public String questionText;
     @Column(columnDefinition = "text")
     public String picturePath;
+    @Column(columnDefinition = "text")
+    public String revealPicturePath;
     @OneToMany(cascade = CascadeType.PERSIST)
     public Set<Answer> answers;
     public int time;

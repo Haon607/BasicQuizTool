@@ -40,6 +40,7 @@ export interface Question {
     id: number;
     questionText: string;
     picturePath?: string;
+    revealPicturePath?: string;
     answers: Answer[];
     time: number;
     showAnswers: boolean;

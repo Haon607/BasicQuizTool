@@ -91,7 +91,7 @@ export class QuestionComponent implements OnDestroy {
 
     private setInitialGsapStates(hasPicture: boolean) {
         gsap.set('#question-card', {x: -175, y: 400, rotate: "30deg", scale: 0.1});
-        gsap.set('#answers-card', {scale: 0.1, rotate: "-20deg"});
+        if (!(this.layout === "picture")) gsap.set('#answers-card', {scale: 0.1, rotate: "-20deg"});
         gsap.set('#timer', {scale: 0.1, y: 200});
         gsap.set('#scoreboard', {});
         if (hasPicture) {
@@ -144,13 +144,19 @@ export class QuestionComponent implements OnDestroy {
                 break;
 
             case 'showWhatWasPickedPicture':
-                gsap.to("#answers-container", {y: 0, autoAlpha: 1, rotate: "-1deg", ease: "back.out"})
+                gsap.to("#answers-container", {y: 0, x: 1, rotate: "-1deg", ease: "back.out"})
                 gsap.to("#picture-container", {width: "70%", x: 250, rotate: "1deg", ease: "back.out"})
                 this.setGradientOnAnswers(true);
                 break;
 
             case 'showCorrectAnswers':
                 this.currentlyShownToPlayers.correctAnswerIds = this.getCorrectAnswerIds();
+                if (this.game.questionSet.questions[this.game.questionNumber].revealPicturePath) {
+                    gsap.to("#picture-container", {scale: 0.1, autoAlpha: 0, duration: 0.5, ease: "back.in"})
+                    await wait(500)
+                    this.game.questionSet.questions[this.game.questionNumber].picturePath = this.game.questionSet.questions[this.game.questionNumber].revealPicturePath
+                    gsap.to("#picture-container", {scale: 1, autoAlpha: 1, duration: 0.5, ease: "back.out"})
+                }
                 this.lightCorrectAnswersUp(!!this.game.questionSet.questions[this.game.questionNumber].picturePath && !this.game.questionSet.questions[this.game.questionNumber].showAnswers);
                 break;
 
