@@ -89,7 +89,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    /*border: #d41938 solid 1px;*/
+    border: #d41938 solid 1px;
     transform: rotate(-1deg);
     visibility: hidden;
 }
@@ -123,4 +123,25 @@
 #scoreboard {
     z-index: 20;
     visibility: hidden;
+}
+
+#answers-container {
+    position: absolute;
+    height: 1000px;
+    top: 300px;
+    width: 400px;
+    /*visibility: hidden;*/
+}
+
+.picture-answers {
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 30px;
+    width: 90%;
+    margin-top: 20px;
+    background: linear-gradient(90deg, white, white 100%, white 100%);
+    color: var(--primary-text);
+    overflow: hidden;
 }

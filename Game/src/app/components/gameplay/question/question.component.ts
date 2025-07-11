@@ -1,7 +1,7 @@
 import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { InfoCardComponent } from "../../subcomponents/info-card/info-card.component";
 import { dummyGame, Game, TouchComponent } from "../../../models/DTOs";
-import { count, Subject, takeUntil } from "rxjs";
+import { Subject, takeUntil } from "rxjs";
 import { QuestionDevice } from "./question.device";
 import { MemoryService } from "../../../services/memory.service";
 import { DatabaseHttpLinkService } from "../../../services/database-http-link.service";
@@ -66,8 +66,20 @@ export class QuestionComponent implements OnDestroy {
         }
     }
 
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    getPictureAnswersInOrder() {
+        return this.game.questionSet.questions[this.game.questionNumber].answers.slice().sort((a, b) =>
+            this.game.players.filter(player => player.selectedAnswerId === b.id)!.length - this.game.players.filter(player => player.selectedAnswerId === a.id)!.length
+        )
+    }
+
     private async setGame(game: Game) {
         this.game = game;
+        this.game.questionSet.questions[this.game.questionNumber].answers.sort((a, b) => a.answerText.localeCompare(b.answerText))
         const q = game.questionSet.questions[game.questionNumber];
         this.layout = q.picturePath ? (q.showAnswers ? 'pictureAndAnswers' : 'picture') : 'answers';
         this.loadFlowForLayout();
@@ -84,6 +96,8 @@ export class QuestionComponent implements OnDestroy {
         gsap.set('#scoreboard', {});
         if (hasPicture) {
             gsap.set('#picture-container', {scale: 0.1, rotate: "10deg"});
+            if (!this.game.questionSet.questions[this.game.questionNumber].showAnswers)
+                gsap.set("#answers-container", {y: 900, x: 50})
         }
     }
 
@@ -129,9 +143,15 @@ export class QuestionComponent implements OnDestroy {
                 this.setGradientOnAnswers();
                 break;
 
+            case 'showWhatWasPickedPicture':
+                gsap.to("#answers-container", {y: 0, autoAlpha: 1, rotate: "-1deg", ease: "back.out"})
+                gsap.to("#picture-container", {width: "70%", x: 250, rotate: "1deg", ease: "back.out"})
+                this.setGradientOnAnswers(true);
+                break;
+
             case 'showCorrectAnswers':
                 this.currentlyShownToPlayers.correctAnswerIds = this.getCorrectAnswerIds();
-                this.setOutlineOnCorrectAnswers();
+                this.lightCorrectAnswersUp(!!this.game.questionSet.questions[this.game.questionNumber].picturePath && !this.game.questionSet.questions[this.game.questionNumber].showAnswers);
                 break;
 
             case 'displayScoreboard':
@@ -154,10 +174,11 @@ export class QuestionComponent implements OnDestroy {
                 await this.hideUIElements();
                 this.game.questionNumber++;
                 this.game.players.forEach(player => {
-                    this.db.setPlayerScore(player.id, player.score).subscribe(() => {});
+                    this.db.setPlayerScore(player.id, player.score).subscribe(() => {
+                    });
                 });
                 this.db.modifyGame(this.game.id, {'questionNumber': this.game.questionNumber}).subscribe(() => {
-                    this.router.navigateByUrl('dummy', { skipLocationChange: true }).then(() => {
+                    this.router.navigateByUrl('dummy', {skipLocationChange: true}).then(() => {
                         this.router.navigateByUrl('question/' + this.game.id);
                     });
                 });
@@ -182,14 +203,15 @@ export class QuestionComponent implements OnDestroy {
     }
 
     private updateUI() {
-        this.deviceHandler.sendUiState(this.states[0], this.game, this.currentlyShownToPlayers);
+        this.deviceHandler.sendUiState(this.states[0], this.game, this.currentlyShownToPlayers,
+            (this.game.questionSet.questions[this.game.questionNumber].picturePath && !this.game.questionSet.questions[this.game.questionNumber].showAnswers) ? this.game.questionSet.questions[this.game.questionNumber].answers.length : null);
     }
 
     private loadFlowForLayout() {
         const flowMap: Record<typeof this.layout, possibleStates[]> = {
             answers: ['displayQuestion', 'displayAnswerOptions', 'startTimer', 'endTimer', 'showWhatWasPicked', 'showCorrectAnswers', 'displayScoreboard', 'addScores', 'nextRound'],
             pictureAndAnswers: ['displayQuestion', 'displayPicture', 'displayAnswerOptions', 'startTimer', 'endTimer', 'showWhatWasPicked', 'showCorrectAnswers', 'displayScoreboard', 'addScores', 'nextRound'],
-            picture: ['displayQuestion', 'displayPicture', 'startTimer', 'endTimer', 'showWhatWasPicked', 'showCorrectAnswers', 'displayScoreboard', 'addScores', 'nextRound'],
+            picture: ['displayQuestion', 'displayPicture', 'startTimer', 'endTimer', 'showWhatWasPickedPicture', 'showCorrectAnswers', 'displayScoreboard', 'addScores', 'nextRound'],
         };
         this.states = flowMap[this.layout];
     }
@@ -206,12 +228,12 @@ export class QuestionComponent implements OnDestroy {
             .map(a => a.id);
     }
 
-    private setGradientOnAnswers() {
+    private setGradientOnAnswers(colorOnSpectrum: boolean = false) {
         const total = this.game.players.length;
         this.game.questionSet.questions[this.game.questionNumber].answers.forEach((answer, i) => {
             const count = this.game.players.filter(p => p.selectedAnswerId === answer.id).length;
             const percent = (count / total) * 100;
-            const color = getAnswerColorFromIndex(i);
+            const color = getAnswerColorFromIndex(i, colorOnSpectrum ? this.game.questionSet.questions[this.game.questionNumber].answers.length : NaN);
             const faded = ColorFader.adjustBrightness(color, -50);
             gsap.to(`#answer-${answer.id}`, {
                 background: `linear-gradient(90deg, ${color}, ${color} ${percent}%, ${faded} ${percent}%)`
@@ -219,12 +241,12 @@ export class QuestionComponent implements OnDestroy {
         });
     }
 
-    private setOutlineOnCorrectAnswers() {
+    private lightCorrectAnswersUp(colorOnSpectrum: boolean = false) {
         const total = this.game.players.length;
         this.game.questionSet.questions[this.game.questionNumber].answers.forEach((answer, i) => {
             const count = this.game.players.filter(p => p.selectedAnswerId === answer.id).length;
             const percent = (count / total) * 100;
-            const color = getAnswerColorFromIndex(i);
+            const color = getAnswerColorFromIndex(i, colorOnSpectrum ? this.game.questionSet.questions[this.game.questionNumber].answers.length : NaN);
             const gradient = answer.isCorrect
                 ? `linear-gradient(90deg, ${ColorFader.adjustBrightness(color, 75)}, ${ColorFader.adjustBrightness(color, 100)} ${percent}%, ${ColorFader.adjustBrightness(color, 0)} ${percent}%)`
                 : `linear-gradient(90deg, ${ColorFader.adjustBrightness(color, 0)}, ${ColorFader.adjustBrightness(color, -25)} ${percent}%, ${ColorFader.adjustBrightness(color, -75)} ${percent}%)`;
@@ -249,15 +271,14 @@ export class QuestionComponent implements OnDestroy {
         if (this.game.questionSet.questions[this.game.questionNumber].picturePath) {
             await wait(250);
             gsap.to('#picture-container', {scale: 0.1, autoAlpha: 0, ease: "back.in"});
+            if (!this.game.questionSet.questions[this.game.questionNumber].showAnswers) {
+                await wait(250);
+                gsap.to("#answers-container", {y: 900, x: 50, autoAlpha: 0, scale: 0.1, ease: 'back.in'});
+            }
         }
         await wait(250);
         gsap.to('#question-card', {scale: 0.1, autoAlpha: 0, ease: "back.in"});
         await wait(1000);
-    }
-
-    ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
     }
 }
 
@@ -268,6 +289,7 @@ export type possibleStates =
     | 'startTimer'
     | 'endTimer'
     | 'showWhatWasPicked'
+    | 'showWhatWasPickedPicture'
     | 'showCorrectAnswers'
     | 'displayScoreboard'
     | 'addScores'

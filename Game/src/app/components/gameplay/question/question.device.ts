@@ -17,7 +17,7 @@ export class QuestionDevice {
         });
     }
 
-    sendUiState(nextState: possibleStates, game: Game, currentlyShownToPlayers: { question: boolean; answersSelectable: boolean | null, correctAnswerIds: number[] }): void {
+    sendUiState(nextState: possibleStates, game: Game, currentlyShownToPlayers: { question: boolean; answersSelectable: boolean | null, correctAnswerIds: number[] }, pictureQuestionNumberOfAnswers: number | null = null): void {
         let elements: TouchComponent[] = [
             {
                 id: "continue",
@@ -43,7 +43,7 @@ export class QuestionDevice {
                 id: "answer-host-" + answer.id,
                 displayName: currentlyShownToPlayers.answersSelectable !== null ? game.players.filter(player => player.selectedAnswerId === answer.id).length + " - " + answer.answerText + (answer.isCorrect && !currentlyShownToPlayers.answersSelectable ? ' ✓' : '') : answer.answerText,
                 type: "label",
-                color: getAnswerColorFromIndex(index),
+                color: getAnswerColorFromIndex(index, pictureQuestionNumberOfAnswers ?? NaN),
                 reference: 'host',
                 fontColor: '#FFF'
             });
@@ -105,7 +105,7 @@ export class QuestionDevice {
                         id: "player-answer-" + player.id + "-" + answer.id,
                         displayName: answer.answerText,
                         type: currentlyShownToPlayers.answersSelectable ? "button" : "label",
-                        color: player.selectedAnswerId === answer.id ? ColorFader.adjustBrightness(getAnswerColorFromIndex(index), 100) : getAnswerColorFromIndex(index),
+                        color: player.selectedAnswerId === answer.id ? ColorFader.adjustBrightness(getAnswerColorFromIndex(index, pictureQuestionNumberOfAnswers ?? NaN), 150) : getAnswerColorFromIndex(index, pictureQuestionNumberOfAnswers ?? NaN),
                         fontColor: player.selectedAnswerId === answer.id ? '#000' : '#FFF',
                         reference: player.reference,
                         sendUpdate: true
@@ -113,7 +113,6 @@ export class QuestionDevice {
                 });
             });
         }
-
         this.device.sendUIState(elements);
     }
 
@@ -130,6 +129,8 @@ export class QuestionDevice {
             case "endTimer":
                 return "Zeit stoppen";
             case "showWhatWasPicked":
+                return "Spielerantworten anzeigen";
+            case "showWhatWasPickedPicture":
                 return "Spielerantworten anzeigen";
             case "showCorrectAnswers":
                 return "Richtige Antworten anzeigen";

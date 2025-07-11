@@ -1,3 +1,5 @@
+import { getColorOnSpectrum } from "./app/utils";
+
 export const text = "#110813";
 export const primaryText = "#f7f3fc";
 export const background = "#f8f2fa";
@@ -13,6 +15,9 @@ export const answer6 = "#864cbf";
 
 export const maxPlayersNeededToNotAnimate = 10;
 
-export function getAnswerColorFromIndex(index: number) {
-    return [answer1, answer2, answer3, answer4, answer5, answer6][index];
+export function getAnswerColorFromIndex(index: number, pictureQuestionNumberOfAnswerOptions = NaN) {
+    return !isNaN(pictureQuestionNumberOfAnswerOptions) ?
+        getColorOnSpectrum(index, 0, pictureQuestionNumberOfAnswerOptions, +30)
+        :
+        [answer1, answer2, answer3, answer4, answer5, answer6][index];
 }

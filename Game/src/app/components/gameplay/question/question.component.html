@@ -20,4 +20,13 @@
             <img id="picture" class="content" [src]="game.questionSet.questions[game.questionNumber].picturePath" alt="questionimg">
         </div>
     }
+    @if (layout === 'picture') {
+        <div class="content answers-card-picture" id="answers-container">
+            @for (answer of getPictureAnswersInOrder(); track answer.id) {
+                <div class="picture-answers" id="answer-{{answer.id}}">
+                    <p class="answers-text answers-text-picture">{{ answer.answerText }}</p>
+                </div>
+            }
+        </div>
+    }
 </div>
