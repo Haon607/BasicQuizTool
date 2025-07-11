@@ -1,7 +1,7 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { InfoCardComponent } from "../../subcomponents/info-card/info-card.component";
 import { dummyGame, Game, TouchComponent } from "../../../models/DTOs";
-import { Subject, takeUntil } from "rxjs";
+import { count, Subject, takeUntil } from "rxjs";
 import { QuestionDevice } from "./question.device";
 import { MemoryService } from "../../../services/memory.service";
 import { DatabaseHttpLinkService } from "../../../services/database-http-link.service";
@@ -26,7 +26,7 @@ import { convertPlayerToScoreboardPlayers, ScoreboardComponent } from "../../sub
     standalone: true,
     styleUrl: './question.component.css'
 })
-export class QuestionComponent {
+export class QuestionComponent implements OnDestroy {
     @ViewChild(TimerComponent) timer!: TimerComponent;
     @ViewChild(ScoreboardComponent) scoreboard!: ScoreboardComponent;
 
@@ -55,7 +55,7 @@ export class QuestionComponent {
 
         const id = Number(this.activatedRoute.snapshot.paramMap.get('gameid')!);
         if (memory.game) {
-            this.game = memory.game;
+            this.setGame(memory.game);
             this.setupPage();
         } else {
             this.db.getGame(id).subscribe(game => {
@@ -81,7 +81,7 @@ export class QuestionComponent {
         gsap.set('#question-card', {x: -175, y: 400, rotate: "30deg", scale: 0.1});
         gsap.set('#answers-card', {scale: 0.1, rotate: "-20deg"});
         gsap.set('#timer', {scale: 0.1, y: 200});
-        gsap.set('#scoreboard', {scale: 0.1, rotate: "-30deg"});
+        gsap.set('#scoreboard', {});
         if (hasPicture) {
             gsap.set('#picture-container', {scale: 0.1, rotate: "10deg"});
         }
@@ -135,8 +135,8 @@ export class QuestionComponent {
                 break;
 
             case 'displayScoreboard':
-                gsap.to('#scoreboard', {scale: 1, autoAlpha: 1, rotate: 0, duration: 2});
-                await wait(2000);
+                gsap.to('#scoreboard', {autoAlpha: 1, duration: 1, ease: "back.out"});
+                await wait(1000);
                 this.scoreboard.setPlayers(convertPlayerToScoreboardPlayers(this.game.players), false);
                 await wait(1000);
                 this.scoreboard.setPlayers(convertPlayerToScoreboardPlayers(this.game.players, this.getCorrectAnswerIds()), true);
@@ -153,6 +153,14 @@ export class QuestionComponent {
             case 'nextRound':
                 await this.hideUIElements();
                 this.game.questionNumber++;
+                this.game.players.forEach(player => {
+                    this.db.setPlayerScore(player.id, player.score).subscribe(() => {});
+                });
+                this.db.modifyGame(this.game.id, {'questionNumber': this.game.questionNumber}).subscribe(() => {
+                    this.router.navigateByUrl('dummy', { skipLocationChange: true }).then(() => {
+                        this.router.navigateByUrl('question/' + this.game.id);
+                    });
+                });
                 break;
         }
 
@@ -169,7 +177,7 @@ export class QuestionComponent {
     }
 
     private async animateIn(selector: string, animation: Record<string, any>) {
-        await wait(500);
+        // await wait(500);
         gsap.to(selector, {autoAlpha: 1, ease: "back.out", ...animation});
     }
 
@@ -213,8 +221,6 @@ export class QuestionComponent {
 
     private setOutlineOnCorrectAnswers() {
         const total = this.game.players.length;
-        const correctIds = this.getCorrectAnswerIds();
-
         this.game.questionSet.questions[this.game.questionNumber].answers.forEach((answer, i) => {
             const count = this.game.players.filter(p => p.selectedAnswerId === answer.id).length;
             const percent = (count / total) * 100;
@@ -238,11 +244,20 @@ export class QuestionComponent {
 
     private async hideUIElements() {
         gsap.to('#scoreboard', {scale: 0.1, autoAlpha: 0, ease: "back.in"});
-        await wait(500);
+        await wait(250);
         gsap.to('#answers-card', {scale: 0.1, autoAlpha: 0, ease: "back.in"});
-        await wait(500);
+        if (this.game.questionSet.questions[this.game.questionNumber].picturePath) {
+            await wait(250);
+            gsap.to('#picture-container', {scale: 0.1, autoAlpha: 0, ease: "back.in"});
+        }
+        await wait(250);
         gsap.to('#question-card', {scale: 0.1, autoAlpha: 0, ease: "back.in"});
         await wait(1000);
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 }
 

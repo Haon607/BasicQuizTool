@@ -19,16 +19,20 @@ export class ScoreboardComponent {
     public setQuestionNumbers(currentQuestionNumber: number, totalQuestionNumber: number) {
         this.currentQuestionNumber = currentQuestionNumber;
         this.totalQuestionNumber = totalQuestionNumber;
+        gsap.set('#question-number-card', {scale: 0.1});
     }
 
     public setPlayers(players: ScoreboardPlayer[], hasCorrect: boolean) {
         this.players = players;
         // for (let i = 0; i < 100; i++) this.players.push({id: i * 500, placement: i + 9, isCorrect: false, score: i, name: Math.pow(2, i) + ""})
         this.updatePlayers(hasCorrect);
+        gsap.to('#question-number-card', {scale: 1, autoAlpha: 1, ease: "back.out"});
     }
 
     private async updatePlayers(hasCorrect: boolean) {
         await wait(100);
+        gsap.set('#question-number-card', {scale: 0.1});
+        gsap.to('#question-number-card', {scale: 1, autoAlpha: 1, ease: "back.out"});
         for (const player of this.players) {
             if (this.players.length <= 14) this.excel14Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
             else if (this.players.length <= 24) this.excel24Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);

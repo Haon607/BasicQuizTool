@@ -54,6 +54,10 @@ export class DatabaseHttpLinkService {
     return this.http.get<Player>(`${this.playerUrl}/${id}`);
   }
 
+  setPlayerScore(id: number, score: number): Observable<Player> {
+    return this.http.patch<Player>(`${this.playerUrl}/${id}/${score}`, {});
+  }
+
   // === Question endpoints ===
 
   getAllQuestions(): Observable<Question[]> {

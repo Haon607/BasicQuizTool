@@ -42,4 +42,13 @@ public class PlayerController {
     public ResponseEntity<Player> createPlayer(@RequestBody Player player) {
         return ResponseEntity.ok().body(playerRepository.save(player));
     }
+
+    @PatchMapping("/{id}/{score}")
+    public ResponseEntity<Player> setPlayerScore(@PathVariable Long id, @PathVariable Long score) {
+        Optional<Player> playerObs = playerRepository.findById(id);
+        if (playerObs.isEmpty()) return ResponseEntity.notFound().build();
+        Player player = playerObs.get();
+        player.score = score;
+        return ResponseEntity.ok().body(playerRepository.save(player));
+    }
 }

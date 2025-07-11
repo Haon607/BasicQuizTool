@@ -21,3 +21,25 @@
     width: 30%;
     font-weight: bolder;
 }
+
+#question-number-card {
+    width: 250px;
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    transform: rotate(2deg);
+    visibility: hidden;
+}
+
+#question-number-current {
+    background: var(--accent);
+    color: var(--primary-text);
+    border: none;
+    border-radius: 30px;
+    width: 170px;
+    text-align: center;
+}
+
+#question-number-headline, #question-number-total {
+    font-size: 30px;
+}

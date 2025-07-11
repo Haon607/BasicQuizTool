@@ -21,12 +21,12 @@ export class TimerComponent {
     public async setupTimer() {
         if (this.timerRunning && this.timeLeft > 0) return
         this.timerRunning = false;
-        gsap.to("#timer-bar", {width: 100 + "%", duration: 3, ease: "power1.out"});
-        countWithDelay(this.timeLeft, this.maxTime, 2500, value => {
+        gsap.to("#timer-bar", {width: 100 + "%", duration: 2, ease: "power1.out"});
+        countWithDelay(this.timeLeft, this.maxTime, 1500, value => {
             this.timeLeft = value;
             this.checkFontSize();
         });
-        await wait(3000);
+        await wait(2000);
     }
 
     public async startTimer(timeOutCallback: () => void) {
