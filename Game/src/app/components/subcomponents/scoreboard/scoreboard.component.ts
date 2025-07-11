@@ -51,11 +51,13 @@ export class ScoreboardComponent implements AfterViewInit {
     public setSet(setName: string) {
         this.setName = setName;
         gsap.set('#set-container-container', {scale: 0.1});
-        gsap.to('#set-container-container', {scale: 1, rotate: "-87deg", autoAlpha: 1, ease: "back.out"});
+        gsap.to('#set-container-container', {scale: 0.9, rotate: "-87deg", autoAlpha: 1, ease: "back.out"});
     }
 
     public setPlayers(players: ScoreboardPlayer[], hasCorrect: boolean) {
         this.players = players;
+        // for (let i = 0; i < 126 ; i++) this.players.push({id: i * 500, placement: i + 14, isCorrect: false, score: i, name: Math.pow(2, i) + ""})
+
         this.updatePlayers(hasCorrect);
         gsap.to('#question-number-card', {scale: 1, rotate: this.route.component === this.constructor ? "-2deg" : "2deg", autoAlpha: 1, ease: "back.out"});
     }
@@ -65,12 +67,12 @@ export class ScoreboardComponent implements AfterViewInit {
         gsap.set('#question-number-card', {scale: 0.1});
         gsap.to('#question-number-card', {scale: 1, autoAlpha: 1, ease: "back.out"});
         for (const player of this.players) {
-            if (this.players.length <= 14) this.excel14Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
-            else if (this.players.length <= 24) this.excel24Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
-            else if (this.players.length <= 40) this.excel40Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
-            else if (this.players.length <= 65) this.excel65Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
-            else if (this.players.length <= 90) this.excel90Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
-            else if (this.players.length <= 160) this.excel160Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
+            if (this.players.length <= 7) this.excel14Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
+            else if (this.players.length <= 16) this.excel24Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
+            else if (this.players.length <= 30) this.excel40Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
+            else if (this.players.length <= 52) this.excel65Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
+            else if (this.players.length <= 75) this.excel90Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
+            else if (this.players.length <= 140) this.excel160Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
             else this.excel40Placement(player, player.placement, this.players.find(p => p.placement === 0)?.score === player.score, hasCorrect);
         }
     }
@@ -103,12 +105,12 @@ export class ScoreboardComponent implements AfterViewInit {
         gsap.set('#player-card-' + playerId, {zIndex: this.players.length - i});
         gsap.to('#player-card-' + playerId,
             {
-                x: initX + (xDisplacement * Math.floor(i / elementsPerColumn)),
+                x: initX + (xDisplacement * (i / elementsPerColumn)),
                 y: initY + ((i - (elementsPerColumn * Math.floor(i / elementsPerColumn))) * yDisplacement),
                 rotate: 0,
                 autoAlpha: 1,
                 scale: scale,
-                outline: hasCorrect ? (isCorrect ? "#0F0 20px solid" : secondary + " 20px solid") : (isOnTopPlace ? "#FFF 20px solid" : secondary + " 20px solid"),
+                outline: hasCorrect ? (isCorrect ? "#0F0 10px solid" : secondary + " 10px solid") : (isOnTopPlace ? "#FFF 10px solid" : secondary + " 10px solid"),
                 ease: "power1",
             }
         );

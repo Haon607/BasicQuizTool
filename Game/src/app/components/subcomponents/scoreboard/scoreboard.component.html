@@ -9,14 +9,18 @@
             </p>
         </div>
     }
-    <div class="content" id="question-number-card">
-        <p id="question-number-headline">Frage:</p>
-        <h3 id="question-number-current">{{currentQuestionNumber+1}}</h3>
-        <p id="question-number-total">/ {{totalQuestionNumber}}</p>
+    <div id="question-number-card">
+        <div id="question-counter-shape-current" class="counter-shape">
+            <p id="question-number-current">{{ currentQuestionNumber + 1 }}</p>
+        </div>
+        <div id="question-counter-shape-total" class="counter-shape">
+            <p id="question-number-total">{{ totalQuestionNumber }}</p>
+        </div>
     </div>
+
     <div class="content" id="set-container-container">
         <div id="set-container">
-            <h1 id="set">{{ setName }}</h1>
+            <h3 id="set">{{ setName }}</h3>
         </div>
     </div>
 </div>

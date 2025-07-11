@@ -189,10 +189,10 @@ export class QuestionComponent implements OnDestroy {
                         else this.router.navigateByUrl('scoreboard/' + this.game.id);
                     });
                 });
-                break;
+                return;
         }
 
-        this.updateUI();
+        if (this.states[0] === 'startTimer') this.updateUI();
         this.states.shift();
 
         if (this.states[0] === 'startTimer') {
@@ -256,7 +256,7 @@ export class QuestionComponent implements OnDestroy {
             const color = getAnswerColorFromIndex(i, colorOnSpectrum ? this.game.questionSet.questions[this.game.questionNumber].answers.length : NaN);
             const gradient = answer.isCorrect
                 ? `linear-gradient(90deg, ${ColorFader.adjustBrightness(color, 75)}, ${ColorFader.adjustBrightness(color, 100)} ${percent}%, ${ColorFader.adjustBrightness(color, 0)} ${percent}%)`
-                : `linear-gradient(90deg, ${ColorFader.adjustBrightness(color, 0)}, ${ColorFader.adjustBrightness(color, -25)} ${percent}%, ${ColorFader.adjustBrightness(color, -75)} ${percent}%)`;
+                : `linear-gradient(90deg, ${ColorFader.adjustBrightness(color, -25)}, ${ColorFader.adjustBrightness(color, -50)} ${percent}%, ${ColorFader.adjustBrightness(color, -75)} ${percent}%)`;
 
             gsap.to(`#answer-${answer.id}`, {background: gradient});
         });

@@ -138,6 +138,12 @@
                 window.location.reload();
             }
 
+            if (gameId.startsWith('SET')) {
+                localStorage.setItem("playerReference", prompt("reference"));
+                console.log('[RESET] Reset Local Storage:', localStorage.getItem("playerReference"));
+                window.location.reload();
+            }
+
             console.log('[Fetch] Getting touchComponents for gameId:', gameId);
             const touchComponentsRes = await fetch(`http://192.168.0.6:28080/api/game/touchComponents/${gameId}`);
             if (!touchComponentsRes.ok) throw new Error(`Failed to fetch touchComponents: ${touchComponentsRes.status}`);
