@@ -192,15 +192,18 @@
                 const name = prompt("Name");
                 console.log('[Player] Name entered:', name);
 
-                function generateUUID() {
-                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                        const r = Math.random() * 16 | 0;
-                        const v = c === 'x' ? r : (r & 0x3 | 0x8);
-                        return v.toString(16);
-                    });
+                function generateReference() {
+                    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                    let reference = '';
+                    for (let i = 0; i < 6; i++) {
+                        const randomIndex = Math.floor(Math.random() * chars.length);
+                        reference += chars[randomIndex];
+                    }
+                    return reference;
                 }
 
-                reference = reference || (crypto.randomUUID ? crypto.randomUUID() : generateUUID());
+
+                reference = generateReference();
                 console.log('[Player] Final reference:', reference);
                 localStorage.setItem("playerReference", reference);
 
