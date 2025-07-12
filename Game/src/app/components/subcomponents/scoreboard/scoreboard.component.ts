@@ -33,6 +33,7 @@ export class ScoreboardComponent implements AfterViewInit {
             if (this.memory.game) {
                 this.fillScoreboardWithGameData(this.memory.game);
             } else {
+                document.documentElement.requestFullscreen();
                 this.db.getGame(id).subscribe(game => {
                     this.memory.game = game;
                     this.fillScoreboardWithGameData(game);

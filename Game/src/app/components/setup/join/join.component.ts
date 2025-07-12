@@ -52,6 +52,8 @@ export class JoinComponent implements AfterViewChecked, OnDestroy {
         //     this.setupPage(game, setId);
         // });
 
+        document.documentElement.requestFullscreen();
+
         device.incomingEvents.subscribe(incomingEvent => {
             if (incomingEvent.event === 'player-joined') {
                 this.db.getGame(this.game!.id).subscribe(game => {

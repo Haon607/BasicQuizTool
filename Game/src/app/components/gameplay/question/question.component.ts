@@ -63,6 +63,7 @@ export class QuestionComponent implements OnDestroy {
                 this.memory.game = game;
                 this.setupPage();
             });
+            document.documentElement.requestFullscreen();
         }
     }
 
