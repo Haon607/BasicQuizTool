@@ -111,7 +111,7 @@
     const mainButtons = document.getElementById('main-buttons');
     const toolbarContent = document.getElementById('toolbar-content');
 
-    let gameId = prompt("Game ID:");
+    let gameId = prompt("Spielnummer:"); //TODO gameid rejoin with localstorage
     let currentState = [];
 
     function update() {
@@ -189,7 +189,7 @@
                     }
                 }
 
-                const name = prompt("Name");
+                const name = prompt("Dein Name");
                 console.log('[Player] Name entered:', name);
 
                 function generateReference() {
@@ -328,6 +328,21 @@
             });
 
         // console.log('[UI] Finished rendering components.');
+    }
+
+    function reload () {
+        console.log("RELOADING...");
+        window.location.reload();
+    }
+
+    ws.onclose = () => {
+        console.log("WS closed");
+        reload();
+    }
+
+    ws.onerror = () => {
+        console.log("WS error");
+        reload();
     }
 
     function getContrastColor(hexColor) {

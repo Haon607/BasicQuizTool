@@ -11,5 +11,7 @@ import { Game } from "../../../models/DTOs";
 export class InfoCardComponent {
   @Input() game!: Game;
 
-
+    protected fullScreen(): void {
+        document.documentElement.requestFullscreen();
+    }
 }

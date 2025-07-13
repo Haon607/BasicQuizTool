@@ -127,7 +127,6 @@
 
 #answers-container {
     position: absolute;
-    height: 1000px;
     top: 300px;
     width: 400px;
     visibility: hidden;

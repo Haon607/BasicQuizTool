@@ -1,5 +1,6 @@
 package org.example.databaseserver.objects.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,6 +18,7 @@ public class Player {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "playerIdSequence")
     public Long id;
     public String name;
-    public UUID reference;
+    @Column(columnDefinition = "text")
+    public String reference;
     public Long score;
 }

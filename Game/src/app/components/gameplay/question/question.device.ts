@@ -103,7 +103,7 @@ export class QuestionDevice {
                 game.questionSet.questions[game.questionNumber].answers.forEach((answer, index) => {
                     elements.push({
                         id: "player-answer-" + player.id + "-" + answer.id,
-                        displayName: answer.answerText,
+                        displayName: answer.answerText + (answer.isCorrect && currentlyShownToPlayers.correctAnswerIds.length > 0 ? ' ✓' : ''),
                         type: currentlyShownToPlayers.answersSelectable ? "button" : "label",
                         color: player.selectedAnswerId === answer.id ? ColorFader.adjustBrightness(getAnswerColorFromIndex(index, pictureQuestionNumberOfAnswers ?? NaN), 150) : getAnswerColorFromIndex(index, pictureQuestionNumberOfAnswers ?? NaN),
                         fontColor: player.selectedAnswerId === answer.id ? '#000' : '#FFF',

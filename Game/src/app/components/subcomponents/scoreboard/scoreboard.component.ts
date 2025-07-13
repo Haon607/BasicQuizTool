@@ -33,7 +33,6 @@ export class ScoreboardComponent implements AfterViewInit {
             if (this.memory.game) {
                 this.fillScoreboardWithGameData(this.memory.game);
             } else {
-                document.documentElement.requestFullscreen();
                 this.db.getGame(id).subscribe(game => {
                     this.memory.game = game;
                     this.fillScoreboardWithGameData(game);
@@ -123,6 +122,10 @@ export class ScoreboardComponent implements AfterViewInit {
         this.setSet(game.questionSet.name);
         this.setPlayers(convertPlayerToScoreboardPlayers(game.players), false);
         this.deviceHandler.sendUiState(game.players, game.questionSet.name);
+    }
+
+    protected fullScreen(): void {
+        document.documentElement.requestFullscreen();
     }
 }
 

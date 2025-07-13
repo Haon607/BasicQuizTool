@@ -1,18 +1,21 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
-import { InfoCardComponent } from "../../subcomponents/info-card/info-card.component";
-import { dummyGame, Game, TouchComponent } from "../../../models/DTOs";
-import { Subject, takeUntil } from "rxjs";
-import { QuestionDevice } from "./question.device";
-import { MemoryService } from "../../../services/memory.service";
-import { DatabaseHttpLinkService } from "../../../services/database-http-link.service";
-import { DeviceService } from "../../../services/device.service";
-import { ActivatedRoute, Router } from "@angular/router";
-import { TimerComponent } from "../../subcomponents/timer/timer.component";
-import { ColorFader, wait } from "../../../utils";
-import { NgClass } from "@angular/common";
-import { gsap } from "gsap";
-import { getAnswerColorFromIndex } from "../../../../styles";
-import { convertPlayerToScoreboardPlayers, ScoreboardComponent } from "../../subcomponents/scoreboard/scoreboard.component";
+import {Component, OnDestroy, ViewChild} from '@angular/core';
+import {InfoCardComponent} from "../../subcomponents/info-card/info-card.component";
+import {Answer, dummyGame, Game, Player, TouchComponent} from "../../../models/DTOs";
+import {Subject, takeUntil} from "rxjs";
+import {QuestionDevice} from "./question.device";
+import {MemoryService} from "../../../services/memory.service";
+import {DatabaseHttpLinkService} from "../../../services/database-http-link.service";
+import {DeviceService} from "../../../services/device.service";
+import {ActivatedRoute, Router} from "@angular/router";
+import {TimerComponent} from "../../subcomponents/timer/timer.component";
+import {ColorFader, wait} from "../../../utils";
+import {NgClass} from "@angular/common";
+import {gsap} from "gsap";
+import {getAnswerColorFromIndex} from "../../../../styles";
+import {
+    convertPlayerToScoreboardPlayers,
+    ScoreboardComponent
+} from "../../subcomponents/scoreboard/scoreboard.component";
 
 @Component({
     selector: 'app-question.component',
@@ -33,7 +36,11 @@ export class QuestionComponent implements OnDestroy {
     protected game: Game = dummyGame;
     protected layout: 'answers' | 'pictureAndAnswers' | 'picture' = 'answers';
     protected states: possibleStates[] = [];
-    protected currentlyShownToPlayers: { question: boolean, answersSelectable: boolean | null, correctAnswerIds: number[] } = {
+    protected currentlyShownToPlayers: {
+        question: boolean,
+        answersSelectable: boolean | null,
+        correctAnswerIds: number[]
+    } = {
         question: false,
         answersSelectable: null,
         correctAnswerIds: []
@@ -63,7 +70,6 @@ export class QuestionComponent implements OnDestroy {
                 this.memory.game = game;
                 this.setupPage();
             });
-            document.documentElement.requestFullscreen();
         }
     }
 
@@ -145,8 +151,9 @@ export class QuestionComponent implements OnDestroy {
                 break;
 
             case 'showWhatWasPickedPicture':
-                gsap.to("#answers-container", {y: 0, x: 1, autoAlpha: 1, rotate: "-1deg", ease: "back.out"})
-                gsap.to("#picture-container", {width: "70%", x: 250, rotate: "1deg", ease: "back.out"})
+                gsap.set("#answers-container", {height: (150 * this.game.questionSet.questions[this.game.questionNumber].answers.length) + "px"});
+                gsap.to("#answers-container", {y: 0, x: 1, autoAlpha: 1, rotate: "-1deg", ease: "back.out"});
+                gsap.to("#picture-container", {width: "70%", x: 250, rotate: "1deg", ease: "back.out"});
                 this.setGradientOnAnswers(true);
                 break;
 
@@ -154,8 +161,8 @@ export class QuestionComponent implements OnDestroy {
                 this.currentlyShownToPlayers.correctAnswerIds = this.getCorrectAnswerIds();
                 if (this.game.questionSet.questions[this.game.questionNumber].revealPicturePath) {
                     gsap.to("#picture-container", {scale: 0.1, autoAlpha: 0, duration: 0.5, ease: "back.in"})
-                    await wait(500)
-                    this.game.questionSet.questions[this.game.questionNumber].picturePath = this.game.questionSet.questions[this.game.questionNumber].revealPicturePath
+                    await wait(500);
+                    this.game.questionSet.questions[this.game.questionNumber].picturePath = this.game.questionSet.questions[this.game.questionNumber].revealPicturePath;
                     gsap.to("#picture-container", {scale: 1, autoAlpha: 1, duration: 0.5, ease: "back.out"})
                 }
                 this.lightCorrectAnswersUp(!!this.game.questionSet.questions[this.game.questionNumber].picturePath && !this.game.questionSet.questions[this.game.questionNumber].showAnswers);
@@ -184,6 +191,11 @@ export class QuestionComponent implements OnDestroy {
                     this.db.setPlayerScore(player.id, player.score).subscribe(() => {
                     });
                 });
+                this.game.players.map(player => {
+                    player.selectedAnswerId = undefined;
+                    return player;
+                });
+                this.memory._game = this.game;
                 this.db.modifyGame(this.game.id, {'questionNumber': this.game.questionNumber}).subscribe(() => {
                     this.router.navigateByUrl('dummy', {skipLocationChange: true}).then(() => {
                         if (this.game.questionNumber < this.game.questionSet.questions.length) this.router.navigateByUrl('question/' + this.game.id)
@@ -236,20 +248,58 @@ export class QuestionComponent implements OnDestroy {
             .map(a => a.id);
     }
 
+    private getAnswerGradient(answerId: number, index: number, colorOnSpectrum: boolean): string {
+        const count = this.game.players.filter(p => p.selectedAnswerId === answerId).length;
+        const percent = (count / this.game.players.length) * 100;
+
+        const color = getAnswerColorFromIndex(
+            index,
+            colorOnSpectrum ? this.game.questionSet.questions[this.game.questionNumber].answers.length : NaN
+        );
+
+        const faded = ColorFader.adjustBrightness(color, -50);
+
+        return `linear-gradient(90deg, ${color}, ${color} ${percent}%, ${faded} ${percent}%)`;
+    }
+
     private setGradientOnAnswers(colorOnSpectrum: boolean = false) {
-        const total = this.game.players.length;
-        this.game.questionSet.questions[this.game.questionNumber].answers.forEach((answer, i) => {
-            const count = this.game.players.filter(p => p.selectedAnswerId === answer.id).length;
-            const percent = (count / total) * 100;
-            const color = getAnswerColorFromIndex(i, colorOnSpectrum ? this.game.questionSet.questions[this.game.questionNumber].answers.length : NaN);
-            const faded = ColorFader.adjustBrightness(color, -50);
+        const question = this.game.questionSet.questions[this.game.questionNumber];
+        const answers = question.answers;
+
+        answers.forEach((answer, i) => {
+            const gradient = this.getAnswerGradient(
+                answer.id,
+                i,
+                colorOnSpectrum
+            );
+
             gsap.to(`#answer-${answer.id}`, {
-                background: `linear-gradient(90deg, ${color}, ${color} ${percent}%, ${faded} ${percent}%)`
+                background: gradient
             });
         });
     }
 
+
     private lightCorrectAnswersUp(colorOnSpectrum: boolean = false) {
+        let stopFlash = false;
+        this.destroy$.subscribe(() => stopFlash = true)
+
+        async function flashUntil(answerId: number, gradient: any, baseGradient: any, correct: boolean) {
+            let reverse: boolean = true;
+            gsap.to(`#answer-${answerId}`, {background: gradient});
+            if (!correct) return;
+            await wait(1000);
+            while (!stopFlash) {
+                reverse = !reverse;
+                if (reverse) {
+                    gsap.to(`#answer-${answerId}`, {background: gradient, duration: 1,  ease: "none"});
+                } else {
+                    gsap.to(`#answer-${answerId}`, {background: baseGradient, duration: 1,  ease: "none"});
+                }
+                await wait(1000);
+            }
+        }
+
         const total = this.game.players.length;
         this.game.questionSet.questions[this.game.questionNumber].answers.forEach((answer, i) => {
             const count = this.game.players.filter(p => p.selectedAnswerId === answer.id).length;
@@ -259,7 +309,12 @@ export class QuestionComponent implements OnDestroy {
                 ? `linear-gradient(90deg, ${ColorFader.adjustBrightness(color, 75)}, ${ColorFader.adjustBrightness(color, 100)} ${percent}%, ${ColorFader.adjustBrightness(color, 0)} ${percent}%)`
                 : `linear-gradient(90deg, ${ColorFader.adjustBrightness(color, -25)}, ${ColorFader.adjustBrightness(color, -50)} ${percent}%, ${ColorFader.adjustBrightness(color, -75)} ${percent}%)`;
 
-            gsap.to(`#answer-${answer.id}`, {background: gradient});
+
+            flashUntil(answer.id, gradient, this.getAnswerGradient(
+                answer.id,
+                i,
+                colorOnSpectrum,
+            ), answer.isCorrect);
         });
     }
 

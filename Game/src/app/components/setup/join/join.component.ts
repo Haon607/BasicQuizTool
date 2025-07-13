@@ -1,14 +1,14 @@
-import { AfterViewChecked, Component, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Router } from "@angular/router";
-import { DatabaseHttpLinkService } from "../../../services/database-http-link.service";
-import { MemoryService } from "../../../services/memory.service";
-import { Game } from "../../../models/DTOs";
-import { DeviceService } from "../../../services/device.service";
-import { gsap } from "gsap";
-import { wait } from "../../../utils";
-import { JoinDevice } from "./join.device";
-import { Subject, takeUntil } from "rxjs";
-import { maxPlayersNeededToNotAnimate } from "../../../../styles";
+import {AfterViewChecked, Component, OnDestroy} from '@angular/core';
+import {ActivatedRoute, Router} from "@angular/router";
+import {DatabaseHttpLinkService} from "../../../services/database-http-link.service";
+import {MemoryService} from "../../../services/memory.service";
+import {Game} from "../../../models/DTOs";
+import {DeviceService} from "../../../services/device.service";
+import {gsap} from "gsap";
+import {wait} from "../../../utils";
+import {JoinDevice} from "./join.device";
+import {Subject, takeUntil} from "rxjs";
+import {maxPlayersNeededToNotAnimate} from "../../../../styles";
 
 @Component({
     selector: 'app-join.game',
@@ -113,7 +113,7 @@ export class JoinComponent implements AfterViewChecked, OnDestroy {
         });
         this.device.sendEmptyUi();
         gsap.to('#player-card-container', {scale: 0.1, autoAlpha: 0, ease: "back.in", duration: 1});
-        gsap.to("#qr-code-container", {scale: 0.1, autoAlpha: 0, ease: "back.in"})
+        gsap.to(".qr-code-container", {scale: 0.1, autoAlpha: 0, ease: "back.in"})
         await wait(1000);
         this.stopSpinning = true;
         gsap.to('#info-card', {scale: 0.1, autoAlpha: 0, ease: "back.in", duration: 1});
@@ -144,13 +144,13 @@ export class JoinComponent implements AfterViewChecked, OnDestroy {
             this.memory.game = game;
             this.startCircle();
             this.deviceHandler.sendUiState(game.players);
-            gsap.set("#qr-code-container", {scale: 0.1});
+            gsap.set(".qr-code-container", {scale: 0.1});
         });
     }
 
     private toggleQrCode() {
         this.showQrCodes = !this.showQrCodes;
-        if (this.showQrCodes) gsap.to("#qr-code-container", {scale: 1, autoAlpha: 1, ease: "back.out"})
-        else gsap.to("#qr-code-container", {scale: 0.1, autoAlpha: 0, ease: "back.in"})
+        if (this.showQrCodes) gsap.to(".qr-code-container", {scale: 1, autoAlpha: 1, ease: "back.out"})
+        else gsap.to(".qr-code-container", {scale: 0.1, autoAlpha: 0, ease: "back.in"})
     }
 }
