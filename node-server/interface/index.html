@@ -111,8 +111,10 @@
     const mainButtons = document.getElementById('main-buttons');
     const toolbarContent = document.getElementById('toolbar-content');
 
-    let gameId = prompt("Spielnummer:"); //TODO gameid rejoin with localstorage
+    let gameId = prompt("Spielnummer:", localStorage.getItem("gameId") ?? ""); //TODO gameid rejoin with localstorage
     let currentState = [];
+
+    localStorage.setItem("gameId", gameId);
 
     function update() {
         console.log('[update] Sending current state to server:', currentState);
@@ -135,14 +137,16 @@
             if (gameId.startsWith('RESET')) {
                 localStorage.setItem("playerReference", '');
                 console.log('[RESET] Reset Local Storage:', localStorage.getItem("playerReference"));
-                window.location.reload();
+                reload();
             }
 
             if (gameId.startsWith('SET')) {
                 localStorage.setItem("playerReference", prompt("reference"));
                 console.log('[RESET] Reset Local Storage:', localStorage.getItem("playerReference"));
-                window.location.reload();
+                reload();
             }
+
+            localStorage.setItem("gameId", gameId);
 
             console.log('[Fetch] Getting touchComponents for gameId:', gameId);
             const touchComponentsRes = await fetch(`http://192.168.0.6:28080/api/game/touchComponents/${gameId}`);
@@ -152,6 +156,7 @@
             console.log('[Fetch] Received touchComponents:', touchComponents);
 
             if (!Array.isArray(touchComponents)) {
+                reload();
                 throw new Error("Invalid touchComponents format");
             }
 
@@ -238,6 +243,8 @@
             }
 
         } catch (error) {
+            alert("Irgendetwas ist schief gelaufen...\n" + error);
+            reload();
             console.error("[Error] Initialization failed:", error);
         }
     };
@@ -264,8 +271,7 @@
         currentState = JSON.parse(JSON.stringify(components)); // clone
         // console.log('[UI] Cloned components into currentState:', currentState);
 
-        components
-            .forEach((comp, index) => {
+        components.forEach((comp, index) => {
                 if (comp.reference !== localStorage.getItem("playerReference")) return;
 
                 // console.log(`[UI] Rendering component [${index}]:`, comp);
@@ -351,8 +357,7 @@
         const g = parseInt(color.slice(2, 4), 16) / 255;
         const b = parseInt(color.slice(4, 6), 16) / 255;
         const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-        const contrast = luminance > 0.5 ? '#000000' : '#FFFFFF';
         // console.log(`[Color] getContrastColor(${hexColor}) = ${contrast}`);
-        return contrast;
+        return luminance > 0.5 ? '#000000' : '#FFFFFF';
     }
 </script>
