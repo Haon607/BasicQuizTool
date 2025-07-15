@@ -111,7 +111,7 @@
     const mainButtons = document.getElementById('main-buttons');
     const toolbarContent = document.getElementById('toolbar-content');
 
-    let gameId = prompt("Spielnummer:", localStorage.getItem("gameId") ?? ""); //TODO gameid rejoin with localstorage
+    let gameId = prompt("Spielnummer:", localStorage.getItem("gameId") ?? "");
     let currentState = [];
 
     localStorage.setItem("gameId", gameId);
