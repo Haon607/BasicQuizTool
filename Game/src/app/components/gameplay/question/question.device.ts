@@ -60,7 +60,6 @@ export class QuestionDevice {
             displayName: game.players.filter(player => player.selectedAnswerId).length + " / " + game.players.length + " Spieler",
             type: "label",
             color: game.players.some(player => !player.selectedAnswerId) ? '#000000' : '#FFFFFF',
-            fontColor: '#FFF',
             reference: 'host'
         });
 
