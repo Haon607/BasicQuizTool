@@ -16,6 +16,7 @@ export class MemoryService {
     set game(value: Game | undefined) {
         this._game = value;
         if (value) {
+            console.log( `url("${value.questionSet.picturePath}")`)
             gsap.set("body", {backgroundImage: `url("${value.questionSet.picturePath}")`});
             if (value.questionNumber < value.questionSet.questions.length) {}
             else this.router.navigateByUrl('scoreboard/' + value.id);

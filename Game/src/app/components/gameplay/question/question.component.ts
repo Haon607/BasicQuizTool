@@ -88,12 +88,12 @@ export class QuestionComponent implements OnDestroy {
         this.game = game;
         this.game.questionSet.questions[this.game.questionNumber].answers.sort((a, b) => a.answerText.localeCompare(b.answerText))
         const q = game.questionSet.questions[game.questionNumber];
-        this.layout = q.picturePath ? (q.showAnswers ? 'pictureAndAnswers' : 'picture') : 'answers';
+        this.layout = q.picturePath || q.revealPicturePath ? (q.showAnswers ? 'pictureAndAnswers' : 'picture') : 'answers';
         this.loadFlowForLayout();
 
         await wait(100);
         this.scoreboard.setQuestionNumbers(game.questionNumber, game.questionSet.questions.length);
-        this.setInitialGsapStates(!!q.picturePath);
+        this.setInitialGsapStates(!!(q.picturePath || q.revealPicturePath));
     }
 
     private setInitialGsapStates(hasPicture: boolean) {
@@ -160,10 +160,12 @@ export class QuestionComponent implements OnDestroy {
             case 'showCorrectAnswers':
                 this.currentlyShownToPlayers.correctAnswerIds = this.getCorrectAnswerIds();
                 if (this.game.questionSet.questions[this.game.questionNumber].revealPicturePath) {
-                    gsap.to("#picture-container", {scale: 0.1, autoAlpha: 0, duration: 0.5, ease: "back.in"})
-                    await wait(500);
+                    if (this.game.questionSet.questions[this.game.questionNumber].picturePath) {
+                        gsap.to("#picture-container", {scale: 0.1, autoAlpha: 0, duration: 0.5, ease: "back.in"})
+                        await wait(500);
+                    }
                     this.game.questionSet.questions[this.game.questionNumber].picturePath = this.game.questionSet.questions[this.game.questionNumber].revealPicturePath;
-                    gsap.to("#picture-container", {scale: 1, autoAlpha: 1, duration: 0.5, ease: "back.out"})
+                    gsap.to("#picture-container", {scale: 1, autoAlpha: 1, duration: 0.5, rotate: "-1deg", ease: "back.out"})
                 }
                 this.lightCorrectAnswersUp(!!this.game.questionSet.questions[this.game.questionNumber].picturePath && !this.game.questionSet.questions[this.game.questionNumber].showAnswers);
                 break;
@@ -230,7 +232,9 @@ export class QuestionComponent implements OnDestroy {
     private loadFlowForLayout() {
         const flowMap: Record<typeof this.layout, possibleStates[]> = {
             answers: ['displayQuestion', 'displayAnswerOptions', 'startTimer', 'endTimer', 'showWhatWasPicked', 'showCorrectAnswers', 'displayScoreboard', 'addScores', 'nextRound'],
-            pictureAndAnswers: ['displayQuestion', 'displayPicture', 'displayAnswerOptions', 'startTimer', 'endTimer', 'showWhatWasPicked', 'showCorrectAnswers', 'displayScoreboard', 'addScores', 'nextRound'],
+            pictureAndAnswers: this.game.questionSet.questions[this.game.questionNumber].picturePath ?
+                ['displayQuestion', 'displayPicture', 'displayAnswerOptions', 'startTimer', 'endTimer', 'showWhatWasPicked', 'showCorrectAnswers', 'displayScoreboard', 'addScores', 'nextRound']
+                : ['displayQuestion', 'displayAnswerOptions', 'startTimer', 'endTimer', 'showWhatWasPicked', 'showCorrectAnswers', 'displayScoreboard', 'addScores', 'nextRound'],
             picture: ['displayQuestion', 'displayPicture', 'startTimer', 'endTimer', 'showWhatWasPickedPicture', 'showCorrectAnswers', 'displayScoreboard', 'addScores', 'nextRound'],
         };
         this.states = flowMap[this.layout];
