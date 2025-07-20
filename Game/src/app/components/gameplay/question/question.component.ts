@@ -164,6 +164,7 @@ export class QuestionComponent implements OnDestroy {
                         gsap.to("#picture-container", {scale: 0.1, autoAlpha: 0, duration: 0.5, ease: "back.in"})
                         await wait(500);
                     }
+                    gsap.set("#picture-container", {bottom: "10px", height: "75%"});
                     this.game.questionSet.questions[this.game.questionNumber].picturePath = this.game.questionSet.questions[this.game.questionNumber].revealPicturePath;
                     gsap.to("#picture-container", {scale: 1, autoAlpha: 1, duration: 0.5, rotate: "-1deg", ease: "back.out"})
                 }
