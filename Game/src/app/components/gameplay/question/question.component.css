@@ -114,6 +114,7 @@
     max-width: 95%;
     max-height: 95%;
     outline: white 15px solid;
+    outline-offset: -1px;
 }
 
 #timer {
