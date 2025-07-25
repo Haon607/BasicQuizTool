@@ -1,4 +1,4 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy } from '@angular/core';
 import { Game, Player } from "../../../models/DTOs";
 import gsap from "gsap";
 import { wait } from "../../../utils";
@@ -8,6 +8,7 @@ import { MemoryService } from "../../../services/memory.service";
 import { DatabaseHttpLinkService } from "../../../services/database-http-link.service";
 import { DeviceService } from "../../../services/device.service";
 import { ScoreboardDevice } from "./scoreboard.device";
+import { Subject, takeUntil } from "rxjs";
 
 @Component({
     selector: 'app-scoreboard',
@@ -16,15 +17,29 @@ import { ScoreboardDevice } from "./scoreboard.device";
     standalone: true,
     styleUrl: './scoreboard.component.css'
 })
-export class ScoreboardComponent implements AfterViewInit {
+export class ScoreboardComponent implements AfterViewInit, OnDestroy {
     protected players: ScoreboardPlayer[] = [];
     protected currentQuestionNumber: number = 0;
     protected totalQuestionNumber: number = 0;
-    private deviceHandler: ScoreboardDevice;
     protected setName: string = "";
+    protected text: string = "";
+    private destroy$ = new Subject<void>();
+    private deviceHandler: ScoreboardDevice;
 
     constructor(private route: ActivatedRoute, private memory: MemoryService, private db: DatabaseHttpLinkService, private device: DeviceService) {
         this.deviceHandler = new ScoreboardDevice(device);
+        this.device.incomingTouchComponents.pipe(takeUntil(this.destroy$)).subscribe(components => {
+            this.deviceHandler.handleTabletInput(components, (text: string) => {
+                gsap.set("#text-card", {autoAlpha: 0, scale: 0.1});
+                this.text = (text);
+                gsap.to("#text-card", {autoAlpha: 1, ease: "back.out", scale: 1});
+            });
+        });
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     ngAfterViewInit() {

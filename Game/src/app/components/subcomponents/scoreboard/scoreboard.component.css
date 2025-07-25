@@ -112,3 +112,20 @@
     justify-content: center;
     text-align: center;
 }
+
+#text-card {
+    padding: 50px;
+    position: absolute;
+    left: 500px;
+    right: 50px;
+    transform: rotate(2deg);
+    visibility: hidden;
+}
+
+#text-card-text {
+    height: 100%;
+    font-size: 160px;
+    border-radius: 30px;
+    padding: 30px;
+    background: var(--secondary);
+}

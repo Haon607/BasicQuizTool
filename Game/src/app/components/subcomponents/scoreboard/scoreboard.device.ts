@@ -9,6 +9,12 @@ export class ScoreboardDevice {
     ) {
     }
 
+    handleTabletInput(components: TouchComponent[], setText: (text: string) => void) {
+        components.filter(component => component.pressed).forEach(component => {
+            if (component.id === "host-update" && component.reference === 'host') setText(components.find(comp => comp.id === "host-settext")!.value!);
+        });
+    }
+
     sendUiState(players: Player[], questionSetName: string): void {
         let elements: TouchComponent[] = [];
 
@@ -25,6 +31,20 @@ export class ScoreboardDevice {
                 displayName: questionSetName,
                 type: "label",
                 color: primary,
+                reference: "host"
+            }, {
+                id: "host-settext",
+                displayName: "Text...",
+                type: "input",
+                color: secondary,
+                reference: "host"
+            }, {
+                id: "host-update",
+                displayName: "Update",
+                type: "button",
+                color: primary,
+                toolbarButton: true,
+                sendUpdate: true,
                 reference: "host"
             }
         );
