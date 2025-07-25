@@ -23,7 +23,6 @@ export class IntroDevice {
             {
                 id: "continue",
                 displayName: "Weiter",
-                disabled: players.length <= 1,
                 type: "button",
                 sendUpdate: true,
                 toolbarButton: true,

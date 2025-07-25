@@ -1,21 +1,18 @@
-import {Component, OnDestroy, ViewChild} from '@angular/core';
-import {InfoCardComponent} from "../../subcomponents/info-card/info-card.component";
-import {Answer, dummyGame, Game, Player, TouchComponent} from "../../../models/DTOs";
-import {Subject, takeUntil} from "rxjs";
-import {QuestionDevice} from "./question.device";
-import {MemoryService} from "../../../services/memory.service";
-import {DatabaseHttpLinkService} from "../../../services/database-http-link.service";
-import {DeviceService} from "../../../services/device.service";
-import {ActivatedRoute, Router} from "@angular/router";
-import {TimerComponent} from "../../subcomponents/timer/timer.component";
-import {ColorFader, wait} from "../../../utils";
-import {NgClass} from "@angular/common";
-import {gsap} from "gsap";
-import {getAnswerColorFromIndex} from "../../../../styles";
-import {
-    convertPlayerToScoreboardPlayers,
-    ScoreboardComponent
-} from "../../subcomponents/scoreboard/scoreboard.component";
+import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { InfoCardComponent } from "../../subcomponents/info-card/info-card.component";
+import { dummyGame, Game, TouchComponent } from "../../../models/DTOs";
+import { Subject, takeUntil } from "rxjs";
+import { QuestionDevice } from "./question.device";
+import { MemoryService } from "../../../services/memory.service";
+import { DatabaseHttpLinkService } from "../../../services/database-http-link.service";
+import { DeviceService } from "../../../services/device.service";
+import { ActivatedRoute, Router } from "@angular/router";
+import { TimerComponent } from "../../subcomponents/timer/timer.component";
+import { ColorFader, wait } from "../../../utils";
+import { NgClass } from "@angular/common";
+import { gsap } from "gsap";
+import { getAnswerColorFromIndex } from "../../../../styles";
+import { convertPlayerToScoreboardPlayers, ScoreboardComponent } from "../../subcomponents/scoreboard/scoreboard.component";
 
 @Component({
     selector: 'app-question.component',
@@ -71,6 +68,10 @@ export class QuestionComponent implements OnDestroy {
                 this.setupPage();
             });
         }
+    }
+
+    get notSinglePlayer(): boolean {
+        return this.game.questionSet.questions[this.game.questionNumber].answers.length > 1;
     }
 
     ngOnDestroy(): void {
@@ -236,7 +237,9 @@ export class QuestionComponent implements OnDestroy {
             pictureAndAnswers: this.game.questionSet.questions[this.game.questionNumber].picturePath ?
                 ['displayQuestion', 'displayPicture', 'displayAnswerOptions', 'startTimer', 'endTimer', 'showWhatWasPicked', 'showCorrectAnswers', 'displayScoreboard', 'addScores', 'nextRound']
                 : ['displayQuestion', 'displayAnswerOptions', 'startTimer', 'endTimer', 'showWhatWasPicked', 'showCorrectAnswers', 'displayScoreboard', 'addScores', 'nextRound'],
-            picture: ['displayQuestion', 'displayPicture', 'startTimer', 'endTimer', 'showWhatWasPickedPicture', 'showCorrectAnswers', 'displayScoreboard', 'addScores', 'nextRound'],
+            picture: this.notSinglePlayer ?
+                ['displayQuestion', 'displayPicture', 'startTimer', 'endTimer', 'showWhatWasPickedPicture', 'showCorrectAnswers', 'displayScoreboard', 'addScores', 'nextRound']
+                : ['displayPicture', 'showCorrectAnswers', 'nextRound'],
         };
         this.states = flowMap[this.layout];
     }
@@ -297,9 +300,9 @@ export class QuestionComponent implements OnDestroy {
             while (!stopFlash) {
                 reverse = !reverse;
                 if (reverse) {
-                    gsap.to(`#answer-${answerId}`, {background: gradient, duration: 1,  ease: "none"});
+                    gsap.to(`#answer-${answerId}`, {background: gradient, duration: 1, ease: "none"});
                 } else {
-                    gsap.to(`#answer-${answerId}`, {background: baseGradient, duration: 1,  ease: "none"});
+                    gsap.to(`#answer-${answerId}`, {background: baseGradient, duration: 1, ease: "none"});
                 }
                 await wait(1000);
             }
@@ -333,9 +336,11 @@ export class QuestionComponent implements OnDestroy {
     }
 
     private async hideUIElements() {
-        gsap.to('#scoreboard', {scale: 0.1, autoAlpha: 0, ease: "back.in"});
-        await wait(250);
-        gsap.to('#answers-card', {scale: 0.1, autoAlpha: 0, ease: "back.in"});
+        if (this.notSinglePlayer) {
+            gsap.to('#scoreboard', {scale: 0.1, autoAlpha: 0, ease: "back.in"});
+            await wait(250);
+            gsap.to('#answers-card', {scale: 0.1, autoAlpha: 0, ease: "back.in"});
+        }
         if (this.game.questionSet.questions[this.game.questionNumber].picturePath) {
             await wait(250);
             gsap.to('#picture-container', {scale: 0.1, autoAlpha: 0, ease: "back.in"});

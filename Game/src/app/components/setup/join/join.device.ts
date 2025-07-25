@@ -35,7 +35,7 @@ export class JoinDevice {
             },{
                 id: "startgame",
                 displayName: "Spiel starten",
-                disabled: players.length <= 1,
+                // disabled: players.length <= 1,
                 type: "button",
                 sendUpdate: true,
                 toolbarButton: true,
