@@ -139,12 +139,14 @@
                 localStorage.setItem("playerReference", '');
                 console.log('[RESET] Reset Local Storage:', localStorage.getItem("playerReference"));
                 reload();
+                return;
             }
 
             if (gameId.startsWith('SET')) {
                 localStorage.setItem("playerReference", prompt("reference"));
                 console.log('[RESET] Reset Local Storage:', localStorage.getItem("playerReference"));
                 reload();
+                return;
             }
 
             localStorage.setItem("gameId", gameId);
