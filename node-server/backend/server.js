@@ -19,6 +19,7 @@ wss.on('connection', function connection(ws) {
 });
 
 function broadcast(msg) {
+    //FIXME Not everyone needs all components? Optimize traffic
     const data = JSON.stringify(msg);
     wss.clients.forEach(client => {
         if (client.readyState === WebSocket.OPEN) {

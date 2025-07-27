@@ -190,6 +190,7 @@ export class QuestionComponent implements OnDestroy {
             case 'nextRound':
                 await this.hideUIElements();
                 this.game.questionNumber++;
+                // FIXME THIS SHOULD NOT FIRE {number of players + 1} requests. also maybe call this at the same time as the hideUiElements
                 this.game.players.forEach(player => {
                     this.db.setPlayerScore(player.id, player.score).subscribe(() => {
                     });
