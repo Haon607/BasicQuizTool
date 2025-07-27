@@ -71,6 +71,7 @@ export class QuestionComponent implements OnDestroy {
     }
 
     get notSinglePlayer(): boolean {
+        // FIXME this is not okay
         return this.game.questionSet.questions[this.game.questionNumber].answers.length > 1;
     }
 
